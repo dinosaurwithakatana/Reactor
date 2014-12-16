@@ -1,14 +1,16 @@
 package io.dwak.tracker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by vrajeevan on 12/16/14.
  */
 public class Tracker {
-    private boolean mActive = false;
+    static boolean mActive = false;
+    private static Tracker sInstance;
+    private static int nextId = 1;
     private TrackerComputation mCurrentComputation = null;
-    private int nextId = 1;
     private ArrayList<TrackerComputation> mPendingComputations;
     private boolean mWillFlush = false;
     private boolean mInFlush = false;
@@ -17,11 +19,11 @@ public class Tracker {
     private ArrayList<TrackerFlushCallbacks> mTrackerFlushCallbackses;
 
     public Tracker() {
+        sInstance = this;
     }
 
-    public void setCurrentComputation(TrackerComputation currentComputation) {
-        mCurrentComputation = currentComputation;
-        mActive = currentComputation != null;
+    public static Tracker getInstance() {
+        return sInstance;
     }
 
     public void requireFlush(){
@@ -32,7 +34,20 @@ public class Tracker {
         }
     }
 
-    public class TrackerComputation {
+    public TrackerComputation getCurrentComputation() {
+        return mCurrentComputation;
+    }
+
+    public void setCurrentComputation(TrackerComputation currentComputation) {
+        mCurrentComputation = currentComputation;
+        mActive = currentComputation != null;
+    }
+
+    interface TrackerInvalidateCallbacks {
+        void onInvalidate();
+    }
+
+    public static class TrackerComputation {
         private final TrackerComputation sInstance;
         private final boolean mStopped;
         private final boolean mInvalidated;
@@ -80,6 +95,10 @@ public class Tracker {
 
         }
 
+        private void onInvalidate(TrackerInvalidateCallbacks callbacks) {
+
+        }
+
         private void compute() {
 
         }
@@ -87,8 +106,54 @@ public class Tracker {
         private void reCompute() {
 
         }
+
+        public int getId() {
+            return mId;
+        }
     }
 
-    private class TrackerInvalidateCallbacks {
+    public static class TrackerDependency {
+        private HashMap<Integer, TrackerComputation> mDependentsById;
+        private TrackerComputation mComputation;
+
+        public TrackerDependency() {
+            mDependentsById = new HashMap<Integer, TrackerComputation>();
+        }
+
+        public boolean depend(TrackerComputation computation) {
+            if (computation == null) {
+                if (!mActive)
+                    return false;
+
+                mComputation = Tracker.getInstance().getCurrentComputation();
+            }
+
+            final int id = computation.getId();
+            if (!mDependentsById.containsKey(id)) {
+                mDependentsById.put(id, computation);
+                computation.onInvalidate(new TrackerInvalidateCallbacks() {
+                    @Override
+                    public void onInvalidate() {
+                        mDependentsById.remove(id);
+                    }
+                });
+
+                return true;
+            }
+            return false;
+        }
+
+        public void changed() {
+            for (Integer id : mDependentsById.keySet()) {
+                mDependentsById.get(id).invalidate();
+            }
+        }
+
+        public boolean hasDependants() {
+            for (Integer id : mDependentsById.keySet()) {
+                return true;
+            }
+            return false;
+        }
     }
 }
