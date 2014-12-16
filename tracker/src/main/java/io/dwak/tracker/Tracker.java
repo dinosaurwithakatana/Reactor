@@ -16,7 +16,7 @@ public class Tracker {
     private boolean mInFlush = false;
     private boolean mInCompute = false;
     private boolean mThrowFirstError = false;
-    private ArrayList<TrackerFlushCallbacks> mTrackerFlushCallbackses;
+    private ArrayList<TrackerComputationFunction> mTrackerFlushCallbacks;
 
     public Tracker() {
         sInstance = this;
@@ -43,8 +43,77 @@ public class Tracker {
         mActive = currentComputation != null;
     }
 
-    interface TrackerInvalidateCallbacks {
-        void onInvalidate();
+    public void flush(boolean throwFirstError) {
+        if (mInFlush) {
+            throw new RuntimeException("Can't call Tracker.flush while flushing");
+        }
+
+        if (mInCompute) {
+            throw new RuntimeException("Can't flush inside Tracker.autoRun");
+        }
+
+        mInFlush = true;
+        mWillFlush = true;
+        mThrowFirstError = throwFirstError;
+
+        boolean finishedTry = false;
+        try {
+            while (!mPendingComputations.isEmpty() || !mTrackerFlushCallbacks.isEmpty()) {
+                for (TrackerComputation pendingComputation : mPendingComputations) {
+                    pendingComputation.reCompute();
+                }
+
+                if (!mTrackerFlushCallbacks.isEmpty()) {
+                }
+            }
+            finishedTry = true;
+        } finally {
+            if (!finishedTry) {
+                mInFlush = false;
+                Tracker.getInstance().flush(false);
+            }
+
+            mWillFlush = false;
+            mInFlush = false;
+        }
+    }
+
+    public TrackerComputation autoRun(TrackerComputationFunction function) {
+        final TrackerComputation trackerComputation = new TrackerComputation(function, mCurrentComputation);
+
+        if (mActive) {
+            onInvalidate(new TrackerComputationFunction() {
+                @Override
+                public void onCompute() {
+                    trackerComputation.stop();
+                }
+            });
+        }
+
+        return trackerComputation;
+    }
+
+    public TrackerComputationFunction nonReactive(TrackerComputationFunction function) {
+        final TrackerComputation previous = mCurrentComputation;
+        setCurrentComputation(null);
+        try {
+            return function;
+        } finally {
+            setCurrentComputation(previous);
+        }
+    }
+
+    public void onInvalidate(TrackerComputationFunction function) {
+        if (!mActive) {
+            throw new RuntimeException("Tracker.onInvalidate requires a currentComputation");
+        }
+
+        mCurrentComputation.onInvalidate(function);
+    }
+
+    public void afterFlush(TrackerComputationFunction function) {
+        mTrackerFlushCallbacks.add(function);
+        requireFlush();
     }
 
     public static class TrackerComputation {
@@ -52,7 +121,7 @@ public class Tracker {
         private final boolean mStopped;
         private final boolean mInvalidated;
         private final int mId;
-        private final ArrayList<TrackerInvalidateCallbacks> mInvalidateCallbacks;
+        private final ArrayList<TrackerComputationFunction> mInvalidateCallbacks;
         private final TrackerComputation mParent;
         private final TrackerComputationFunction mFunction;
         private final boolean mRecomputing;
@@ -65,7 +134,7 @@ public class Tracker {
             mStopped = false;
             mInvalidated = false;
             mId = nextId++;
-            mInvalidateCallbacks = new ArrayList<TrackerInvalidateCallbacks>();
+            mInvalidateCallbacks = new ArrayList<TrackerComputationFunction>();
             mFirstRun = true;
             mParent = parent;
             mFunction = function;
@@ -95,7 +164,7 @@ public class Tracker {
 
         }
 
-        private void onInvalidate(TrackerInvalidateCallbacks callbacks) {
+        private void onInvalidate(TrackerComputationFunction callbacks) {
 
         }
 
@@ -131,9 +200,9 @@ public class Tracker {
             final int id = computation.getId();
             if (!mDependentsById.containsKey(id)) {
                 mDependentsById.put(id, computation);
-                computation.onInvalidate(new TrackerInvalidateCallbacks() {
+                computation.onInvalidate(new TrackerComputationFunction() {
                     @Override
-                    public void onInvalidate() {
+                    public void onCompute() {
                         mDependentsById.remove(id);
                     }
                 });
