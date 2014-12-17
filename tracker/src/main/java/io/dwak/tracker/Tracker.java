@@ -64,6 +64,12 @@ public class Tracker {
                 }
 
                 if (!mTrackerFlushCallbacks.isEmpty()) {
+                    final TrackerComputationFunction function = mTrackerFlushCallbacks.remove(0);
+                    try {
+                        function.onCompute();
+                    }
+                    catch (Exception e){
+                    }
                 }
             }
             finishedTry = true;
