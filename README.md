@@ -30,6 +30,7 @@ Field dependecies in an Activity:
 
 Changing and reacting to property change:
     
+```java 
     mFavoriteFoodDep = new TrackerDependency();
     mFavoriteFood = "PIZZA";
 
@@ -46,3 +47,4 @@ Changing and reacting to property change:
             setFavoriteFood("MANGOES");
         }
     }, 1000);
+```
