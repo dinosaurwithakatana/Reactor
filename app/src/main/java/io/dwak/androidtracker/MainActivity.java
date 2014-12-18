@@ -4,17 +4,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import io.dwak.tracker.Tracker;
 import io.dwak.tracker.TrackerComputationFunction;
+import io.dwak.tracker.TrackerDependency;
 
 
 public class MainActivity extends ActionBarActivity {
-
-    private Tracker.Dependency mFavoriteFoodDep;
+    private TrackerDependency mFavoriteFoodDep;
     private String mFavoriteFood;
 
     @Override
@@ -29,13 +30,13 @@ public class MainActivity extends ActionBarActivity {
                 setFavoriteFood(getFavoriteFood() + "a");
             }
         });
-        mFavoriteFoodDep = new Tracker.Dependency();
+        mFavoriteFoodDep = new TrackerDependency();
         mFavoriteFood = "TEST";
 
         Tracker.getInstance().autoRun(new TrackerComputationFunction() {
             @Override
             public void callback() {
-                textView.setText(getFavoriteFood());
+                Log.d("OIH", getFavoriteFood());
             }
         });
 
