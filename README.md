@@ -49,4 +49,4 @@ Changing and reacting to property change:
     }, 1000);
 ```
 
-with the above code block, you would see `PIZZA` in your logs, and in 1 second, wyould see `MANGOES`
+with the above code block, you would see `PIZZA` in your logs, and in 1 second, would see `MANGOES`
