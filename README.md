@@ -15,7 +15,8 @@ Inititialize your Tracker, usually in an `Application` class
 ###Example
 
 Field dependecies in an Activity:
-    
+
+```java 
     private String getFavoriteFood() {
         mFavoriteFoodDep.depend();  // when this getter is called, the dependecy is added to the tracker
         return mFavoriteFood;
@@ -25,6 +26,7 @@ Field dependecies in an Activity:
         mFavoriteFood = favoriteFood;
         mFavoriteFoodDep.changed(); // when this setter is called, the dependecy is notified that the property has changed
     }
+```
 
 Changing and reacting to property change:
     
