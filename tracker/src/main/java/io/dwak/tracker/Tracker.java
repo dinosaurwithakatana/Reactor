@@ -1,7 +1,10 @@
 package io.dwak.tracker;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseArray;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 /**
@@ -11,18 +14,22 @@ public class Tracker {
     static boolean mActive = false;
     private static Tracker sInstance;
     private static int nextId = 1;
-    private TrackerComputation mCurrentComputation = null;
-    private ArrayList<TrackerComputation> mPendingComputations;
+    private Computation mCurrentComputation = null;
+    private ArrayDeque<Computation> mPendingComputations;
     private boolean mWillFlush = false;
     private boolean mInFlush = false;
     private boolean mInCompute = false;
     private boolean mThrowFirstError = false;
     private ArrayList<TrackerComputationFunction> mTrackerFlushCallbacks;
 
-    public Tracker() {
-        mPendingComputations = new ArrayList<TrackerComputation>();
+    Tracker() {
+        mPendingComputations = new ArrayDeque<Computation>();
         mTrackerFlushCallbacks = new ArrayList<TrackerComputationFunction>();
         sInstance = this;
+    }
+
+    public static Tracker init() {
+        return new Tracker();
     }
 
     public static Tracker getInstance() {
@@ -39,17 +46,21 @@ public class Tracker {
 
     public void requireFlush() {
         if (!mWillFlush) {
-            // TODO
-//            setTimeout(Tracker.flush, 0);
+            new Handler(Looper.getMainLooper()).postAtFrontOfQueue(new Runnable() {
+                @Override
+                public void run() {
+                    flush(false);
+                }
+            });
             mWillFlush = true;
         }
     }
 
-    public TrackerComputation getCurrentComputation() {
+    public Computation getCurrentComputation() {
         return mCurrentComputation;
     }
 
-    public void setCurrentComputation(TrackerComputation currentComputation) {
+    public void setCurrentComputation(Computation currentComputation) {
         mCurrentComputation = currentComputation;
         mActive = currentComputation != null;
     }
@@ -70,14 +81,12 @@ public class Tracker {
         boolean finishedTry = false;
         try {
             while (!mPendingComputations.isEmpty() || !mTrackerFlushCallbacks.isEmpty()) {
-                for (TrackerComputation pendingComputation : mPendingComputations) {
-                    pendingComputation.reCompute();
-                }
+                mPendingComputations.remove().reCompute();
 
                 if (!mTrackerFlushCallbacks.isEmpty()) {
                     final TrackerComputationFunction function = mTrackerFlushCallbacks.remove(0);
                     try {
-                        function.onCompute();
+                        function.callback();
                     } catch (Exception e) {
                     }
                 }
@@ -94,13 +103,13 @@ public class Tracker {
         }
     }
 
-    public TrackerComputation autoRun(TrackerComputationFunction function) {
-        final TrackerComputation trackerComputation = new TrackerComputation(function, mCurrentComputation);
+    public Computation autoRun(TrackerComputationFunction function) {
+        final Computation trackerComputation = new Computation(function, mCurrentComputation);
 
         if (mActive) {
             onInvalidate(new TrackerComputationFunction() {
                 @Override
-                public void onCompute() {
+                public void callback() {
                     trackerComputation.stop();
                 }
             });
@@ -110,7 +119,7 @@ public class Tracker {
     }
 
     public TrackerComputationFunction nonReactive(TrackerComputationFunction function) {
-        final TrackerComputation previous = mCurrentComputation;
+        final Computation previous = getCurrentComputation();
         setCurrentComputation(null);
         try {
             return function;
@@ -132,15 +141,14 @@ public class Tracker {
         requireFlush();
     }
 
-    public ArrayList<TrackerComputation> getPendingComputations() {
+    public ArrayDeque<Computation> getPendingComputations() {
         return mPendingComputations;
     }
 
-    public static class TrackerComputation {
-        private final TrackerComputation sInstance;
+    public static class Computation {
         private final int mId;
         private final ArrayList<TrackerComputationFunction> mInvalidateCallbacks;
-        private final TrackerComputation mParent;
+        private final Computation mParent;
         private final TrackerComputationFunction mFunction;
         private boolean mStopped;
         private boolean mInvalidated;
@@ -149,8 +157,7 @@ public class Tracker {
         private boolean mErrored;
         private boolean mConstructingComputation = false;
 
-        TrackerComputation(TrackerComputationFunction function, TrackerComputation parent) {
-            sInstance = this;
+        Computation(TrackerComputationFunction function, Computation parent) {
             mStopped = false;
             mInvalidated = false;
             mId = nextId++;
@@ -161,7 +168,7 @@ public class Tracker {
             mRecomputing = false;
 
             try {
-                function.onCompute();
+                compute();
                 mErrored = false;
             } finally {
                 mFirstRun = false;
@@ -192,6 +199,14 @@ public class Tracker {
 
                 // callbacks can't add callbacks, because
                 // self.invalidated === true.
+                for (final TrackerComputationFunction invalidateCallback : mInvalidateCallbacks) {
+                    Tracker.getInstance().nonReactive(new TrackerComputationFunction() {
+                        @Override
+                        public void callback() {
+                            invalidateCallback.callback();
+                        }
+                    });
+                }
                 mInvalidateCallbacks.clear();
             }
         }
@@ -202,10 +217,11 @@ public class Tracker {
 
         private void compute() {
             mInvalidated = false;
-            final TrackerComputation previousComputation = Tracker.getInstance().getCurrentComputation();
+            final Computation previousComputation = Tracker.getInstance().getCurrentComputation();
             Tracker.getInstance().setCurrentComputation(this);
             boolean previousInCompute = Tracker.getInstance().isInCompute();
             Tracker.getInstance().setInCompute(true);
+            mFunction.callback();
             Tracker.getInstance().setCurrentComputation(previousComputation);
             Tracker.getInstance().setInCompute(false);
         }
@@ -237,20 +253,23 @@ public class Tracker {
         }
     }
 
-    public static class TrackerDependency {
-        private SparseArray<TrackerComputation> mDependentsById;
-        private TrackerComputation mComputation;
+    public static class Dependency {
+        private SparseArray<Computation> mDependentsById;
 
-        public TrackerDependency() {
-            mDependentsById = new SparseArray<TrackerComputation>();
+        public Dependency() {
+            mDependentsById = new SparseArray<Computation>();
         }
 
-        public boolean depend(TrackerComputation computation) {
+        public boolean depend() {
+            return depend(null);
+        }
+
+        public boolean depend(Computation computation) {
             if (computation == null) {
                 if (!mActive)
                     return false;
 
-                mComputation = Tracker.getInstance().getCurrentComputation();
+                computation = Tracker.getInstance().getCurrentComputation();
             }
 
             final int id = computation.getId();
@@ -258,7 +277,7 @@ public class Tracker {
                 mDependentsById.put(id, computation);
                 computation.onInvalidate(new TrackerComputationFunction() {
                     @Override
-                    public void onCompute() {
+                    public void callback() {
                         mDependentsById.remove(id);
                     }
                 });
