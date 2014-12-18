@@ -1,7 +1,8 @@
 package io.dwak.tracker;
 
+import android.util.SparseArray;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by vrajeevan on 12/16/14.
@@ -19,6 +20,8 @@ public class Tracker {
     private ArrayList<TrackerComputationFunction> mTrackerFlushCallbacks;
 
     public Tracker() {
+        mPendingComputations = new ArrayList<TrackerComputation>();
+        mTrackerFlushCallbacks = new ArrayList<TrackerComputationFunction>();
         sInstance = this;
     }
 
@@ -26,8 +29,16 @@ public class Tracker {
         return sInstance;
     }
 
-    public void requireFlush(){
-        if(!mWillFlush){
+    public boolean isInCompute() {
+        return mInCompute;
+    }
+
+    public void setInCompute(boolean inCompute) {
+        mInCompute = inCompute;
+    }
+
+    public void requireFlush() {
+        if (!mWillFlush) {
             // TODO
 //            setTimeout(Tracker.flush, 0);
             mWillFlush = true;
@@ -67,8 +78,7 @@ public class Tracker {
                     final TrackerComputationFunction function = mTrackerFlushCallbacks.remove(0);
                     try {
                         function.onCompute();
-                    }
-                    catch (Exception e){
+                    } catch (Exception e) {
                     }
                 }
             }
@@ -122,15 +132,19 @@ public class Tracker {
         requireFlush();
     }
 
+    public ArrayList<TrackerComputation> getPendingComputations() {
+        return mPendingComputations;
+    }
+
     public static class TrackerComputation {
         private final TrackerComputation sInstance;
-        private final boolean mStopped;
-        private final boolean mInvalidated;
         private final int mId;
         private final ArrayList<TrackerComputationFunction> mInvalidateCallbacks;
         private final TrackerComputation mParent;
         private final TrackerComputationFunction mFunction;
-        private final boolean mRecomputing;
+        private boolean mStopped;
+        private boolean mInvalidated;
+        private boolean mRecomputing;
         private boolean mFirstRun;
         private boolean mErrored;
         private boolean mConstructingComputation = false;
@@ -159,26 +173,62 @@ public class Tracker {
         }
 
         private void stop() {
-
-        }
-
-        private void onInvalidate() {
-
+            if (mStopped) {
+                mStopped = true;
+                invalidate();
+            }
         }
 
         private void invalidate() {
+            if (!mInvalidated) {
+                // if we're currently in _recompute(), don't enqueue
+                // ourselves, since we'll rerun immediately anyway.
+                if (!mRecomputing && !mStopped) {
+                    Tracker.getInstance().requireFlush();
+                    Tracker.getInstance().getPendingComputations().add(this);
+                }
 
+                mInvalidated = true;
+
+                // callbacks can't add callbacks, because
+                // self.invalidated === true.
+                mInvalidateCallbacks.clear();
+            }
         }
 
-        private void onInvalidate(TrackerComputationFunction callbacks) {
-
+        private void onInvalidate(TrackerComputationFunction callback) {
+            mInvalidateCallbacks.add(callback);
         }
 
         private void compute() {
-
+            mInvalidated = false;
+            final TrackerComputation previousComputation = Tracker.getInstance().getCurrentComputation();
+            Tracker.getInstance().setCurrentComputation(this);
+            boolean previousInCompute = Tracker.getInstance().isInCompute();
+            Tracker.getInstance().setInCompute(true);
+            Tracker.getInstance().setCurrentComputation(previousComputation);
+            Tracker.getInstance().setInCompute(false);
         }
 
         private void reCompute() {
+            mRecomputing = true;
+            try {
+                while (mInvalidated && !mStopped) {
+                    try {
+                        compute();
+                    } catch (Exception e) {
+
+                    }
+                    // If _compute() invalidated us, we run again immediately.
+                    // A computation that invalidates itself indefinitely is an
+                    // infinite loop, of course.
+                    //
+                    // We could put an iteration counter here and catch run-away
+                    // loops.
+                }
+            } finally {
+                mRecomputing = false;
+            }
 
         }
 
@@ -188,11 +238,11 @@ public class Tracker {
     }
 
     public static class TrackerDependency {
-        private HashMap<Integer, TrackerComputation> mDependentsById;
+        private SparseArray<TrackerComputation> mDependentsById;
         private TrackerComputation mComputation;
 
         public TrackerDependency() {
-            mDependentsById = new HashMap<Integer, TrackerComputation>();
+            mDependentsById = new SparseArray<TrackerComputation>();
         }
 
         public boolean depend(TrackerComputation computation) {
@@ -204,7 +254,7 @@ public class Tracker {
             }
 
             final int id = computation.getId();
-            if (!mDependentsById.containsKey(id)) {
+            if (mDependentsById.get(id) == null) {
                 mDependentsById.put(id, computation);
                 computation.onInvalidate(new TrackerComputationFunction() {
                     @Override
@@ -219,16 +269,15 @@ public class Tracker {
         }
 
         public void changed() {
-            for (Integer id : mDependentsById.keySet()) {
-                mDependentsById.get(id).invalidate();
+            int key;
+            for (int i = 0; i < mDependentsById.size(); i++) {
+                key = mDependentsById.keyAt(i);
+                mDependentsById.get(key).invalidate();
             }
         }
 
         public boolean hasDependants() {
-            for (Integer id : mDependentsById.keySet()) {
-                return true;
-            }
-            return false;
+            return mDependentsById.size() > 0;
         }
     }
 }
