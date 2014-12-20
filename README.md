@@ -8,10 +8,6 @@ Meteor's [tracker](https://github.com/meteor/meteor/blob/devel/packages/tracker/
 How to use:
 -----------
 
-Inititialize your Tracker, usually in an `Application` class
-
-    Tracker.init();
-
 ###Example
 
 Field dependecies in an Activity:

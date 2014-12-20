@@ -10,7 +10,10 @@ import java.util.ArrayList;
  * Created by vrajeevan on 12/16/14.
  */
 public class Tracker {
-    // True if there is a current computation, meaning that dependencies on reactive data sources will be tracked and potentially cause the current computation to be rerun.
+    /**
+     * True if there is a current computation, meaning that dependencies on reactive data sources
+     * will be tracked and potentially cause the current computation to be rerun.
+     */
     static boolean mActive = false;
 
     static int nextId = 1;
@@ -73,6 +76,9 @@ public class Tracker {
     }
 
     public static Tracker getInstance() {
+        if(sInstance == null){
+            sInstance = new Tracker();
+        }
         return sInstance;
     }
 
