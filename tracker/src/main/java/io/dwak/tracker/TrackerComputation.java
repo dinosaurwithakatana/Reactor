@@ -3,16 +3,35 @@ package io.dwak.tracker;
 import java.util.ArrayList;
 
 /**
- * Created by vishnu on 12/17/14.
+ * A Computation object represents code that is repeatedly rerun
+ * in response to
+ * reactive data changes. Computations don't have return values; they just
+ * perform actions, such as rerendering a template on the screen. Computations
+ * are created using {@link io.dwak.tracker.Tracker#autoRun(TrackerComputationFunction)}.
+ * Use {@link #stop()} to prevent further rerunning of a
+ * computation.
  */
 public class TrackerComputation {
     private final int mId;
     private final ArrayList<TrackerComputationFunction> mInvalidateCallbacks;
     private final TrackerComputation mParent;
     private final TrackerComputationFunction mFunction;
+
+    /**
+     * true if this computation has been stopped
+     */
     private boolean mStopped;
+
+    /**
+     * true if this computation has been invalidated or stopped
+     */
     private boolean mInvalidated;
     private boolean mRecomputing;
+
+    /**
+     * True during the initial run of the computation at the time {@link io.dwak.tracker.Tracker#autoRun(TrackerComputationFunction)}
+     * is called, and false on subsequent reruns and at other times.
+     */
     private boolean mFirstRun;
     private boolean mErrored;
     private boolean mConstructingComputation = false;
@@ -39,6 +58,9 @@ public class TrackerComputation {
         }
     }
 
+    /**
+     * Prevents this computation from rerunning.
+     */
     void stop() {
         if (mStopped) {
             mStopped = true;
@@ -46,6 +68,9 @@ public class TrackerComputation {
         }
     }
 
+    /**
+     * Invalidates this computation so that it will be rerun.
+     */
     void invalidate() {
         if (!mInvalidated) {
             // if we're currently in _recompute(), don't enqueue
@@ -71,6 +96,12 @@ public class TrackerComputation {
         }
     }
 
+    /**
+     * Registers a {@link io.dwak.tracker.TrackerComputationFunction} to run when this computation is next invalidated,
+     * or runs it immediately if the computation is already invalidated.
+     * The callback is run exactly once and not upon future invalidations unless {@link #onInvalidate(TrackerComputationFunction)}
+     * is called again after the computation becomes valid again.
+     */
     void onInvalidate(TrackerComputationFunction callback) {
         mInvalidateCallbacks.add(callback);
     }
