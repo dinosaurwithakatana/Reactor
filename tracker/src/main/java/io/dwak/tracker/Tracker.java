@@ -199,10 +199,10 @@ public class Tracker {
      */
     public void onInvalidate(TrackerComputationFunction function) {
         if (!mActive) {
-            throw new RuntimeException("Tracker.onInvalidate requires a currentComputation");
+            throw new RuntimeException("Tracker.addInvalidateComputationFunction requires a currentComputation");
         }
 
-        mCurrentTrackerComputation.onInvalidate(function);
+        mCurrentTrackerComputation.addInvalidateComputationFunction(function);
     }
 
     public void afterFlush(TrackerComputationFunction function) {

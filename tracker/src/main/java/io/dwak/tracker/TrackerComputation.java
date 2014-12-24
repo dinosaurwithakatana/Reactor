@@ -61,8 +61,8 @@ public class TrackerComputation {
     /**
      * Prevents this computation from rerunning.
      */
-    void stop() {
-        if (mStopped) {
+    public void stop() {
+        if (!mStopped) {
             mStopped = true;
             invalidate();
         }
@@ -71,7 +71,7 @@ public class TrackerComputation {
     /**
      * Invalidates this computation so that it will be rerun.
      */
-    void invalidate() {
+    public void invalidate() {
         if (!mInvalidated) {
             // if we're currently in _recompute(), don't enqueue
             // ourselves, since we'll rerun immediately anyway.
@@ -99,10 +99,10 @@ public class TrackerComputation {
     /**
      * Registers a {@link io.dwak.tracker.TrackerComputationFunction} to run when this computation is next invalidated,
      * or runs it immediately if the computation is already invalidated.
-     * The callback is run exactly once and not upon future invalidations unless {@link #onInvalidate(TrackerComputationFunction)}
+     * The callback is run exactly once and not upon future invalidations unless {@link #addInvalidateComputationFunction(TrackerComputationFunction)}
      * is called again after the computation becomes valid again.
      */
-    void onInvalidate(TrackerComputationFunction callback) {
+    public void addInvalidateComputationFunction(TrackerComputationFunction callback) {
         mInvalidateCallbacks.add(callback);
     }
 

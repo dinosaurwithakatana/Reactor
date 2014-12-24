@@ -37,7 +37,7 @@ public class TrackerDependency {
         final int id = trackerComputation.getId();
         if (mDependentsById.get(id) == null) {
             mDependentsById.put(id, trackerComputation);
-            trackerComputation.onInvalidate(new TrackerComputationFunction() {
+            trackerComputation.addInvalidateComputationFunction(new TrackerComputationFunction() {
                 @Override
                 public void callback() {
                     mDependentsById.remove(id);

@@ -6,20 +6,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import io.dwak.androidtracker.viewmodel.FavoriteFoodViewModel;
 import io.dwak.tracker.Tracker;
+import io.dwak.tracker.TrackerComputation;
 import io.dwak.tracker.TrackerComputationFunction;
-import io.dwak.tracker.TrackerDependency;
 
 
 public class MainActivity extends ActionBarActivity {
     public static final String PIZZA = "PIZZA";
     public static final String MANGOES = "MANGOES";
-    private TrackerDependency mFavoriteFoodDep;
-    private String mFavoriteFood;
-    private TrackerDependency mSeekBarDep;
-    private int mSeekBarProgress;
-    private boolean mIsPizza = true;
+    public boolean mIsPizza = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +29,12 @@ public class MainActivity extends ActionBarActivity {
         final TextView sliderValue = (TextView) findViewById(R.id.slider_value);
         final SeekBar seekBar = (SeekBar) findViewById(R.id.seekbar);
 
-        mFavoriteFood = PIZZA;
+        final FavoriteFoodViewModel viewModel = new FavoriteFoodViewModel("PIZZA", 100);
 
-        seekBar.setProgress(0);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                setSeekBarProgress(progress);
+                viewModel.setFavoritePercentage(progress);
             }
 
             @Override
@@ -50,51 +47,32 @@ public class MainActivity extends ActionBarActivity {
 
             }
         });
+        Tracker.getInstance().autoRun(new TrackerComputationFunction() {
+            @Override
+            public void callback() {
+                textView.setText(viewModel.getFavoriteFood());
+            }
+        });
+
+        final TrackerComputation favoriteFoodPercentageComputation = Tracker.getInstance().autoRun(new TrackerComputationFunction() {
+            @Override
+            public void callback() {
+                seekBar.setProgress(viewModel.getFavoritePercentage());
+                sliderValue.setText("Percent favorite: " + String.valueOf(viewModel.getFavoritePercentage()));
+
+                if (viewModel.getFavoritePercentage() == 0) {
+                    Toast.makeText(MainActivity.this, "You don't like this food at all!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mIsPizza = !mIsPizza;
-                setFavoriteFood(mIsPizza ? PIZZA : MANGOES);
+                viewModel.setFavoriteFood(mIsPizza ? PIZZA : MANGOES);
             }
         });
-        setupDependencies(textView, sliderValue);
-    }
-
-    private void setupDependencies(final TextView textView, final TextView sliderValue) {
-        mSeekBarDep = new TrackerDependency();
-        mFavoriteFoodDep = new TrackerDependency();
-        Tracker.getInstance().autoRun(new TrackerComputationFunction() {
-            @Override
-            public void callback() {
-                sliderValue.setText("Seekbar progress: " + getSeekBarProgress());
-            }
-        });
-
-        Tracker.getInstance().autoRun(new TrackerComputationFunction() {
-            @Override
-            public void callback() {
-                textView.setText(getFavoriteFood());
-            }
-        });
-    }
-
-    private String getFavoriteFood() {
-        mFavoriteFoodDep.depend();
-        return mFavoriteFood;
-    }
-
-    private void setFavoriteFood(String favoriteFood) {
-        mFavoriteFood = favoriteFood;
-        mFavoriteFoodDep.changed();
-    }
-
-    public int getSeekBarProgress() {
-        mSeekBarDep.depend();
-        return mSeekBarProgress;
-    }
-
-    public void setSeekBarProgress(int seekBarProgress) {
-        mSeekBarProgress = seekBarProgress;
-        mSeekBarDep.changed();
     }
 }
+
