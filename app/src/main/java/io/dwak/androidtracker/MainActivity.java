@@ -15,10 +15,6 @@ import io.dwak.tracker.TrackerComputationFunction;
 
 
 public class MainActivity extends ActionBarActivity {
-    public static final String PIZZA = "PIZZA";
-    public static final String MANGOES = "MANGOES";
-    public boolean mIsPizza = true;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,11 +62,17 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        Tracker.getInstance().autoRun(new TrackerComputationFunction() {
+            @Override
+            public void callback() {
+                viewModel.setFavoriteFood(viewModel.isPizza() ? FavoriteFoodViewModel.PIZZA : FavoriteFoodViewModel.MANGOES);
+            }
+        });
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mIsPizza = !mIsPizza;
-                viewModel.setFavoriteFood(mIsPizza ? PIZZA : MANGOES);
+                viewModel.setPizza(!viewModel.isPizza());
             }
         });
     }
