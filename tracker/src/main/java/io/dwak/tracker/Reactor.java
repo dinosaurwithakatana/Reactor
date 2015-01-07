@@ -9,7 +9,7 @@ import java.util.ArrayList;
 /**
  * Created by vrajeevan on 12/16/14.
  */
-public class Tracker {
+public class Reactor {
     /**
      * True if there is a current computation, meaning that dependencies on reactive data sources
      * will be tracked and potentially cause the current computation to be rerun.
@@ -19,25 +19,25 @@ public class Tracker {
     static int nextId = 1;
 
     /**
-     * Current instance of the {@link #Tracker()}
+     * Current instance of the {@link #Reactor()}
      */
-    private static Tracker sInstance;
+    private static Reactor sInstance;
 
     /**
      * The current computation, or `null` if there isn't one.
-     * The current computation is the {@link io.dwak.tracker.TrackerComputation} object created by the innermost active call to
-     * {@link #autoRun(TrackerComputationFunction)}, and it's the computation that gains dependencies when reactive data sources
+     * The current computation is the {@link ReactorComputation} object created by the innermost active call to
+     * {@link #autoRun(ReactorComputationFunction)}, and it's the computation that gains dependencies when reactive data sources
      * are accessed.
      */
-    private TrackerComputation mCurrentTrackerComputation = null;
+    private ReactorComputation mCurrentReactorComputation = null;
 
     /**
      * computations whose callbacks we should call at flush time
      */
-    private ArrayDeque<TrackerComputation> mPendingTrackerComputations;
+    private ArrayDeque<ReactorComputation> mPendingReactorComputations;
 
     /**
-     * `true` if a {@link io.dwak.tracker.Tracker#flush(boolean)} is scheduled, or if we are in {@link #flush(boolean)} now
+     * `true` if a {@link Reactor#flush(boolean)} is scheduled, or if we are in {@link #flush(boolean)} now
      */
     private boolean mWillFlush = false;
 
@@ -49,7 +49,7 @@ public class Tracker {
     /**
      * `true` if we are computing a computation now, either first time
      * or recompute.  This matches {@link #mActive} unless we are inside
-     * {@link #nonReactive(TrackerComputationFunction)}, which nullfies currentComputation even though
+     * {@link #nonReactive(ReactorComputationFunction)}, which nullfies currentComputation even though
      * an enclosing computation may still be running.
      */
     private boolean mInCompute = false;
@@ -63,22 +63,22 @@ public class Tracker {
      */
     private boolean mThrowFirstError = false;
 
-    private ArrayList<TrackerComputationFunction> mTrackerFlushCallbacks;
+    private ArrayList<ReactorComputationFunction> mTrackerFlushCallbacks;
     private boolean mShouldLog;
 
-    Tracker() {
-        mPendingTrackerComputations = new ArrayDeque<TrackerComputation>();
-        mTrackerFlushCallbacks = new ArrayList<TrackerComputationFunction>();
+    Reactor() {
+        mPendingReactorComputations = new ArrayDeque<ReactorComputation>();
+        mTrackerFlushCallbacks = new ArrayList<ReactorComputationFunction>();
         sInstance = this;
     }
 
-    public static Tracker init() {
-        return new Tracker();
+    public static Reactor init() {
+        return new Reactor();
     }
 
-    public static Tracker getInstance() {
+    public static Reactor getInstance() {
         if(sInstance == null){
-            sInstance = new Tracker();
+            sInstance = new Reactor();
         }
         return sInstance;
     }
@@ -103,13 +103,13 @@ public class Tracker {
         }
     }
 
-    public TrackerComputation getCurrentTrackerComputation() {
-        return mCurrentTrackerComputation;
+    public ReactorComputation getCurrentReactorComputation() {
+        return mCurrentReactorComputation;
     }
 
-    public void setCurrentTrackerComputation(TrackerComputation currentTrackerComputation) {
-        mCurrentTrackerComputation = currentTrackerComputation;
-        mActive = currentTrackerComputation != null;
+    public void setCurrentReactorComputation(ReactorComputation currentReactorComputation) {
+        mCurrentReactorComputation = currentReactorComputation;
+        mActive = currentReactorComputation != null;
     }
 
     /**
@@ -119,11 +119,11 @@ public class Tracker {
      */
     public void flush(boolean throwFirstError) {
         if (mInFlush) {
-            throw new RuntimeException("Can't call Tracker.flush while flushing");
+            throw new RuntimeException("Can't call Reactor.flush while flushing");
         }
 
         if (mInCompute) {
-            throw new RuntimeException("Can't flush inside Tracker.autoRun");
+            throw new RuntimeException("Can't flush inside Reactor.autoRun");
         }
 
         mInFlush = true;
@@ -132,13 +132,13 @@ public class Tracker {
 
         boolean finishedTry = false;
         try {
-            while (!mPendingTrackerComputations.isEmpty() || !mTrackerFlushCallbacks.isEmpty()) {
-                mPendingTrackerComputations.remove().reCompute();
+            while (!mPendingReactorComputations.isEmpty() || !mTrackerFlushCallbacks.isEmpty()) {
+                mPendingReactorComputations.remove().reCompute();
 
                 if (!mTrackerFlushCallbacks.isEmpty()) {
-                    final TrackerComputationFunction function = mTrackerFlushCallbacks.remove(0);
+                    final ReactorComputationFunction function = mTrackerFlushCallbacks.remove(0);
                     try {
-                        function.callback();
+                        function.react();
                     } catch (Exception e) {
                     }
                 }
@@ -147,7 +147,7 @@ public class Tracker {
         } finally {
             if (!finishedTry) {
                 mInFlush = false;
-                Tracker.getInstance().flush(false);
+                Reactor.getInstance().flush(false);
             }
 
             mWillFlush = false;
@@ -157,25 +157,25 @@ public class Tracker {
 
 
     /**
-     * Run a {@link io.dwak.tracker.TrackerComputationFunction} now and rerun it later whenever its dependencies change.
-     * Returns a {@link io.dwak.tracker.TrackerComputation} object that can be used to stop or observe the rerunning.
+     * Run a {@link ReactorComputationFunction} now and rerun it later whenever its dependencies change.
+     * Returns a {@link ReactorComputation} object that can be used to stop or observe the rerunning.
      *
      * @param function function to run when dependencies change
      * @return the tracker computation reference
      */
-    public TrackerComputation autoRun(TrackerComputationFunction function) {
-        final TrackerComputation trackerTrackerComputation = new TrackerComputation(function, mCurrentTrackerComputation);
+    public ReactorComputation autoRun(ReactorComputationFunction function) {
+        final ReactorComputation trackerReactorComputation = new ReactorComputation(function, mCurrentReactorComputation);
 
         if (mActive) {
-            onInvalidate(new TrackerComputationFunction() {
+            onInvalidate(new ReactorComputationFunction() {
                 @Override
-                public void callback() {
-                    trackerTrackerComputation.stop();
+                public void react() {
+                    trackerReactorComputation.stop();
                 }
             });
         }
 
-        return trackerTrackerComputation;
+        return trackerReactorComputation;
     }
 
     /**
@@ -183,36 +183,36 @@ public class Tracker {
      * @param function function to run in nonreactive
      * @return the reference to the computation function
      */
-    public TrackerComputationFunction nonReactive(TrackerComputationFunction function) {
-        final TrackerComputation previous = getCurrentTrackerComputation();
-        setCurrentTrackerComputation(null);
+    public ReactorComputationFunction nonReactive(ReactorComputationFunction function) {
+        final ReactorComputation previous = getCurrentReactorComputation();
+        setCurrentReactorComputation(null);
         try {
             return function;
         } finally {
-            setCurrentTrackerComputation(previous);
+            setCurrentReactorComputation(previous);
         }
     }
 
     /**
-     * Registers a new {@link io.dwak.tracker.TrackerComputationFunction} callback on the current computation (which must exist),
+     * Registers a new {@link ReactorComputationFunction} react on the current computation (which must exist),
      * to be called immediately when the current computation is invalidated or stopped.
-     * @param function the function callback to be run on invalidation
+     * @param function the function react to be run on invalidation
      */
-    public void onInvalidate(TrackerComputationFunction function) {
+    public void onInvalidate(ReactorComputationFunction function) {
         if (!mActive) {
-            throw new RuntimeException("Tracker.addInvalidateComputationFunction requires a currentComputation");
+            throw new RuntimeException("Reactor.addInvalidateComputationFunction requires a currentComputation");
         }
 
-        mCurrentTrackerComputation.addInvalidateComputationFunction(function);
+        mCurrentReactorComputation.addInvalidateComputationFunction(function);
     }
 
-    public void afterFlush(TrackerComputationFunction function) {
+    public void afterFlush(ReactorComputationFunction function) {
         mTrackerFlushCallbacks.add(function);
         requireFlush();
     }
 
-    public ArrayDeque<TrackerComputation> getPendingTrackerComputations() {
-        return mPendingTrackerComputations;
+    public ArrayDeque<ReactorComputation> getPendingReactorComputations() {
+        return mPendingReactorComputations;
     }
 
     public void setShouldLog(boolean shouldLog) {

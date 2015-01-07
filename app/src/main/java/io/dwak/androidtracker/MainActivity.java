@@ -12,9 +12,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import io.dwak.androidtracker.viewmodel.FavoriteFoodViewModel;
-import io.dwak.tracker.Tracker;
-import io.dwak.tracker.TrackerComputation;
-import io.dwak.tracker.TrackerComputationFunction;
+import io.dwak.tracker.Reactor;
+import io.dwak.tracker.ReactorComputation;
+import io.dwak.tracker.ReactorComputationFunction;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -63,22 +63,22 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        Tracker.getInstance().autoRun(new TrackerComputationFunction() {
+        Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void callback() {
+            public void react() {
                 editTextDisplay.setText(viewModel.getEditTextValue());
             }
         });
-        Tracker.getInstance().autoRun(new TrackerComputationFunction() {
+        Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void callback() {
+            public void react() {
                 textView.setText(viewModel.getFavoriteFood());
             }
         });
 
-        final TrackerComputation favoriteFoodPercentageComputation = Tracker.getInstance().autoRun(new TrackerComputationFunction() {
+        final ReactorComputation favoriteFoodPercentageComputation = Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void callback() {
+            public void react() {
                 seekBar.setProgress(viewModel.getFavoritePercentage());
                 sliderValue.setText("Percent favorite: " + String.valueOf(viewModel.getFavoritePercentage()));
 
@@ -88,9 +88,9 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        Tracker.getInstance().autoRun(new TrackerComputationFunction() {
+        Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void callback() {
+            public void react() {
                 viewModel.setFavoriteFood(viewModel.isPizza() ? FavoriteFoodViewModel.PIZZA : FavoriteFoodViewModel.MANGOES);
             }
         });

@@ -1,6 +1,6 @@
 package io.dwak.androidtracker.viewmodel;
 
-import io.dwak.tracker.TrackerDependency;
+import io.dwak.tracker.ReactorDependency;
 
 /**
  * Created by vishnu on 12/23/14.
@@ -13,16 +13,16 @@ public class FavoriteFoodViewModel {
     private int mFavoritePercentage;
 
     private String mEditTextValue;
-    private TrackerDependency mIsPizzaDep;
-    private TrackerDependency mFavoriteFoodDep;
-    private TrackerDependency mFavoritePercentageDep;
-    private TrackerDependency mEditTextValueDep;
+    private ReactorDependency mIsPizzaDep;
+    private ReactorDependency mFavoriteFoodDep;
+    private ReactorDependency mFavoritePercentageDep;
+    private ReactorDependency mEditTextValueDep;
 
     public FavoriteFoodViewModel(String favoriteFood, int favoritePercentage) {
-        mIsPizzaDep = new TrackerDependency();
-        mFavoriteFoodDep = new TrackerDependency();
-        mFavoritePercentageDep = new TrackerDependency();
-        mEditTextValueDep = new TrackerDependency();
+        mIsPizzaDep = new ReactorDependency();
+        mFavoriteFoodDep = new ReactorDependency();
+        mFavoritePercentageDep = new ReactorDependency();
+        mEditTextValueDep = new ReactorDependency();
         mIsPizza = PIZZA.equals(favoriteFood);
         mFavoriteFood = favoriteFood;
         mFavoritePercentage = favoritePercentage;

@@ -7,11 +7,11 @@ import android.util.SparseArray;
  * computation might depend on.
  * When the data changes, the computations are invalidated.
  */
-public class TrackerDependency {
-    private SparseArray<TrackerComputation> mDependentsById;
+public class ReactorDependency {
+    private SparseArray<ReactorComputation> mDependentsById;
 
-    public TrackerDependency() {
-        mDependentsById = new SparseArray<TrackerComputation>();
+    public ReactorDependency() {
+        mDependentsById = new SparseArray<ReactorComputation>();
     }
 
     public boolean depend() {
@@ -19,27 +19,27 @@ public class TrackerDependency {
     }
 
     /**
-     * Declares that the current computation (or {@link io.dwak.tracker.TrackerComputation} if given) depends on `dependency`.
+     * Declares that the current computation (or {@link ReactorComputation} if given) depends on `dependency`.
      * The computation will be invalidated the next time `dependency` changes.
      * If there is no current computation and {@link #depend()}} is called with no arguments, it does nothing and returns false.
      *
-     * @param trackerComputation computation that depends on this dependency
+     * @param reactorComputation computation that depends on this dependency
      * @return true if computation is a new dependant rather than an existing one
      */
-    public boolean depend(TrackerComputation trackerComputation) {
-        if (trackerComputation == null) {
-            if (!Tracker.mActive)
+    public boolean depend(ReactorComputation reactorComputation) {
+        if (reactorComputation == null) {
+            if (!Reactor.mActive)
                 return false;
 
-            trackerComputation = Tracker.getInstance().getCurrentTrackerComputation();
+            reactorComputation = Reactor.getInstance().getCurrentReactorComputation();
         }
 
-        final int id = trackerComputation.getId();
+        final int id = reactorComputation.getId();
         if (mDependentsById.get(id) == null) {
-            mDependentsById.put(id, trackerComputation);
-            trackerComputation.addInvalidateComputationFunction(new TrackerComputationFunction() {
+            mDependentsById.put(id, reactorComputation);
+            reactorComputation.addInvalidateComputationFunction(new ReactorComputationFunction() {
                 @Override
-                public void callback() {
+                public void react() {
                     mDependentsById.remove(id);
                 }
             });
@@ -61,8 +61,8 @@ public class TrackerDependency {
     }
 
     /**
-     * True if this Dependency has one or more dependent {@link io.dwak.tracker.TrackerComputation},
-     * which would be invalidated if this {@link io.dwak.tracker.TrackerDependency} were to change.
+     * True if this Dependency has one or more dependent {@link ReactorComputation},
+     * which would be invalidated if this {@link ReactorDependency} were to change.
      * @return true if the dependency has dependants
      */
     public boolean hasDependants() {

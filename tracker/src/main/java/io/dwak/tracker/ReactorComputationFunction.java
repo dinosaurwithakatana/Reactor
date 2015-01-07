@@ -3,6 +3,6 @@ package io.dwak.tracker;
 /**
  * Created by vrajeevan on 12/16/14.
  */
-public interface TrackerComputationFunction {
-    void callback();
+public interface ReactorComputationFunction {
+    void react();
 }

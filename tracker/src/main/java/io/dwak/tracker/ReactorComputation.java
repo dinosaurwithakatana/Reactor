@@ -9,15 +9,15 @@ import java.util.ArrayList;
  * in response to
  * reactive data changes. Computations don't have return values; they just
  * perform actions, such as rerendering a template on the screen. Computations
- * are created using {@link io.dwak.tracker.Tracker#autoRun(TrackerComputationFunction)}.
+ * are created using {@link Reactor#autoRun(ReactorComputationFunction)}.
  * Use {@link #stop()} to prevent further rerunning of a
  * computation.
  */
-public class TrackerComputation {
+public class ReactorComputation {
     private final int mId;
-    private final ArrayList<TrackerComputationFunction> mInvalidateCallbacks;
-    private final TrackerComputation mParent;
-    private final TrackerComputationFunction mFunction;
+    private final ArrayList<ReactorComputationFunction> mInvalidateCallbacks;
+    private final ReactorComputation mParent;
+    private final ReactorComputationFunction mFunction;
 
     /**
      * true if this computation has been stopped
@@ -31,18 +31,18 @@ public class TrackerComputation {
     private boolean mRecomputing;
 
     /**
-     * True during the initial run of the computation at the time {@link io.dwak.tracker.Tracker#autoRun(TrackerComputationFunction)}
+     * True during the initial run of the computation at the time {@link Reactor#autoRun(ReactorComputationFunction)}
      * is called, and false on subsequent reruns and at other times.
      */
     private boolean mFirstRun;
     private boolean mErrored;
     private boolean mConstructingComputation = false;
 
-    TrackerComputation(TrackerComputationFunction function, TrackerComputation parent) {
+    ReactorComputation(ReactorComputationFunction function, ReactorComputation parent) {
         mStopped = false;
         mInvalidated = false;
-        mId = Tracker.nextId++;
-        mInvalidateCallbacks = new ArrayList<TrackerComputationFunction>();
+        mId = Reactor.nextId++;
+        mInvalidateCallbacks = new ArrayList<ReactorComputationFunction>();
         mFirstRun = true;
         mParent = parent;
         mFunction = function;
@@ -78,19 +78,19 @@ public class TrackerComputation {
             // if we're currently in _recompute(), don't enqueue
             // ourselves, since we'll rerun immediately anyway.
             if (!mRecomputing && !mStopped) {
-                Tracker.getInstance().requireFlush();
-                Tracker.getInstance().getPendingTrackerComputations().add(this);
+                Reactor.getInstance().requireFlush();
+                Reactor.getInstance().getPendingReactorComputations().add(this);
             }
 
             mInvalidated = true;
 
             // callbacks can't add callbacks, because
             // self.invalidated === true.
-            for (final TrackerComputationFunction invalidateCallback : mInvalidateCallbacks) {
-                Tracker.getInstance().nonReactive(new TrackerComputationFunction() {
+            for (final ReactorComputationFunction invalidateCallback : mInvalidateCallbacks) {
+                Reactor.getInstance().nonReactive(new ReactorComputationFunction() {
                     @Override
-                    public void callback() {
-                        invalidateCallback.callback();
+                    public void react() {
+                        invalidateCallback.react();
                     }
                 });
             }
@@ -99,27 +99,27 @@ public class TrackerComputation {
     }
 
     /**
-     * Registers a {@link io.dwak.tracker.TrackerComputationFunction} to run when this computation is next invalidated,
+     * Registers a {@link ReactorComputationFunction} to run when this computation is next invalidated,
      * or runs it immediately if the computation is already invalidated.
-     * The callback is run exactly once and not upon future invalidations unless {@link #addInvalidateComputationFunction(TrackerComputationFunction)}
+     * The react is run exactly once and not upon future invalidations unless {@link #addInvalidateComputationFunction(ReactorComputationFunction)}
      * is called again after the computation becomes valid again.
      */
-    public void addInvalidateComputationFunction(TrackerComputationFunction callback) {
+    public void addInvalidateComputationFunction(ReactorComputationFunction callback) {
         mInvalidateCallbacks.add(callback);
     }
 
     private void compute() {
         mInvalidated = false;
-        final TrackerComputation previousTrackerComputation = Tracker.getInstance().getCurrentTrackerComputation();
-        Tracker.getInstance().setCurrentTrackerComputation(this);
-        boolean previousInCompute = Tracker.getInstance().isInCompute();
-        Tracker.getInstance().setInCompute(true);
-        mFunction.callback();
-        Tracker.getInstance().setCurrentTrackerComputation(previousTrackerComputation);
-        Tracker.getInstance().setInCompute(false);
+        final ReactorComputation previousReactorComputation = Reactor.getInstance().getCurrentReactorComputation();
+        Reactor.getInstance().setCurrentReactorComputation(this);
+        boolean previousInCompute = Reactor.getInstance().isInCompute();
+        Reactor.getInstance().setInCompute(true);
+        mFunction.react();
+        Reactor.getInstance().setCurrentReactorComputation(previousReactorComputation);
+        Reactor.getInstance().setInCompute(false);
 
-        if (Tracker.getInstance().shouldLog()) {
-            Log.d(TrackerComputation.class.getSimpleName(), this.toString());
+        if (Reactor.getInstance().shouldLog()) {
+            Log.d(ReactorComputation.class.getSimpleName(), this.toString());
         }
     }
 
