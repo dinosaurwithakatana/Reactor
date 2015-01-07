@@ -11,17 +11,22 @@ public class FavoriteFoodViewModel {
     private boolean mIsPizza;
     private String mFavoriteFood;
     private int mFavoritePercentage;
+
+    private String mEditTextValue;
     private TrackerDependency mIsPizzaDep;
     private TrackerDependency mFavoriteFoodDep;
     private TrackerDependency mFavoritePercentageDep;
+    private TrackerDependency mEditTextValueDep;
 
     public FavoriteFoodViewModel(String favoriteFood, int favoritePercentage) {
         mIsPizzaDep = new TrackerDependency();
         mFavoriteFoodDep = new TrackerDependency();
         mFavoritePercentageDep = new TrackerDependency();
+        mEditTextValueDep = new TrackerDependency();
         mIsPizza = PIZZA.equals(favoriteFood);
         mFavoriteFood = favoriteFood;
         mFavoritePercentage = favoritePercentage;
+        mEditTextValue = "";
     }
 
     public int getFavoritePercentage() {
@@ -52,5 +57,15 @@ public class FavoriteFoodViewModel {
     public void setPizza(boolean isPizza) {
         mIsPizza = isPizza;
         mIsPizzaDep.changed();
+    }
+
+    public String getEditTextValue() {
+        mEditTextValueDep.depend();
+        return mEditTextValue;
+    }
+
+    public void setEditTextValue(String editTextValue) {
+        mEditTextValue = editTextValue;
+        mEditTextValueDep.changed();
     }
 }

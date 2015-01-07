@@ -64,6 +64,7 @@ public class Tracker {
     private boolean mThrowFirstError = false;
 
     private ArrayList<TrackerComputationFunction> mTrackerFlushCallbacks;
+    private boolean mShouldLog;
 
     Tracker() {
         mPendingTrackerComputations = new ArrayDeque<TrackerComputation>();
@@ -212,5 +213,13 @@ public class Tracker {
 
     public ArrayDeque<TrackerComputation> getPendingTrackerComputations() {
         return mPendingTrackerComputations;
+    }
+
+    public void setShouldLog(boolean shouldLog) {
+        mShouldLog = shouldLog;
+    }
+
+    public boolean shouldLog() {
+        return mShouldLog;
     }
 }

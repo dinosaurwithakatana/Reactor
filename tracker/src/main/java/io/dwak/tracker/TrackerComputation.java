@@ -1,5 +1,7 @@
 package io.dwak.tracker;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 /**
@@ -115,6 +117,10 @@ public class TrackerComputation {
         mFunction.callback();
         Tracker.getInstance().setCurrentTrackerComputation(previousTrackerComputation);
         Tracker.getInstance().setInCompute(false);
+
+        if (Tracker.getInstance().shouldLog()) {
+            Log.d(TrackerComputation.class.getSimpleName(), this.toString());
+        }
     }
 
     void reCompute() {
@@ -141,5 +147,21 @@ public class TrackerComputation {
 
     public int getId() {
         return mId;
+    }
+
+    @Override
+    public String toString() {
+        return "TrackerComputation{" +
+                "mId=" + mId +
+                ", mInvalidateCallbacks=" + mInvalidateCallbacks +
+                ", mParent=" + mParent +
+                ", mFunction=" + mFunction +
+                ", mStopped=" + mStopped +
+                ", mInvalidated=" + mInvalidated +
+                ", mRecomputing=" + mRecomputing +
+                ", mFirstRun=" + mFirstRun +
+                ", mErrored=" + mErrored +
+                ", mConstructingComputation=" + mConstructingComputation +
+                "}";
     }
 }
