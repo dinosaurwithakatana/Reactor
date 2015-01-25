@@ -149,6 +149,10 @@ public class ReactorComputation {
         return mId;
     }
 
+    public boolean isFirstRun() {
+        return mFirstRun;
+    }
+
     @Override
     public String toString() {
         return "TrackerComputation{" +
