@@ -14,7 +14,7 @@ Field dependecies in an Activity:
 
 ```java 
     private String getFavoriteFood() {
-        mFavoriteFoodDep.depend();  // when this getter is called, the dependecy is added to the tracker
+        mFavoriteFoodDep.depend();  // when this getter is called, the dependecy is added to the reactor
         return mFavoriteFood;
     }
 
@@ -27,10 +27,10 @@ Field dependecies in an Activity:
 Changing and reacting to property change:
     
 ```java 
-    mFavoriteFoodDep = new TrackerDependency();
+    mFavoriteFoodDep = new ReactorDependency();
     mFavoriteFood = "PIZZA";
 
-    Tracker.getInstance().autoRun(new TrackerComputationFunction() {
+    Reactor.getInstance().autoRun(new ReactorComputationFunction() {
         @Override
         public void callback() {
             Log.d("TAG", getFavoriteFood());
@@ -49,4 +49,4 @@ with the above code block, you would see `PIZZA` in your logs, and in 1 second, 
 
 ###Intellij/Android Studio plugin
 
-Use this plugin to help generate some of the boilerplate: https://github.com/dinosaurwithakatana/android-tracker-intellij-plugin
+Use this plugin to help generate some of the boilerplate: https://github.com/dinosaurwithakatana/android-reactor-intellij-plugin
