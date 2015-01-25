@@ -1,1 +1,1 @@
-include ':app', ':reactor'
+include ':app', ':reactor', ':reactiveviews'

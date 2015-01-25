@@ -98,7 +98,7 @@ public class MainActivity extends ActionBarActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewModel.setPizza(!viewModel.isPizza());
+                viewModel.setIsPizza(!viewModel.isPizza());
             }
         });
     }
