@@ -1,6 +1,6 @@
 package io.dwak.androidtracker.viewmodel;
 
-import io.dwak.tracker.ReactorDependency;
+import io.dwak.reactor.ReactorDependency;
 
 /**
  * Created by vishnu on 12/23/14.

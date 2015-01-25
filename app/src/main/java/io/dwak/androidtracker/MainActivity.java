@@ -12,9 +12,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import io.dwak.androidtracker.viewmodel.FavoriteFoodViewModel;
-import io.dwak.tracker.Reactor;
-import io.dwak.tracker.ReactorComputation;
-import io.dwak.tracker.ReactorComputationFunction;
+import io.dwak.reactor.Reactor;
+import io.dwak.reactor.ReactorComputation;
+import io.dwak.reactor.ReactorComputationFunction;
 
 
 public class MainActivity extends ActionBarActivity {
