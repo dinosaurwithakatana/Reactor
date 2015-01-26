@@ -14,10 +14,10 @@ public class FavoriteFoodViewModel {
     private ReactorVar<String> mEditTextValue;
 
     public FavoriteFoodViewModel(String favoriteFood, int favoritePercentage) {
-        mIsPizza = new ReactorVar<>(PIZZA.equals(favoriteFood));
-        mFavoriteFood = new ReactorVar<>(favoriteFood);
-        mFavoritePercentage = new ReactorVar<>(favoritePercentage);
-        mEditTextValue = new ReactorVar<>("");
+        mIsPizza = new ReactorVar<Boolean>(PIZZA.equals(favoriteFood));
+        mFavoriteFood = new ReactorVar<String>(favoriteFood);
+        mFavoritePercentage = new ReactorVar<Integer>(favoritePercentage);
+        mEditTextValue = new ReactorVar<String>("");
     }
 
     public Boolean getIsPizza() {
