@@ -14,7 +14,7 @@ import android.widget.Toast;
 import io.dwak.androidtracker.viewmodel.FavoriteFoodViewModel;
 import io.dwak.reactor.Reactor;
 import io.dwak.reactor.ReactorComputation;
-import io.dwak.reactor.ReactorComputationFunction;
+import io.dwak.reactor.interfaces.ReactorComputationFunction;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -65,20 +65,20 @@ public class MainActivity extends ActionBarActivity {
 
         Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void react() {
+            public void react(ReactorComputation reactorComputation) {
                 editTextDisplay.setText(viewModel.getEditTextValue());
             }
         });
         Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void react() {
+            public void react(ReactorComputation reactorComputation) {
                 textView.setText(viewModel.getFavoriteFood());
             }
         });
 
         final ReactorComputation favoriteFoodPercentageComputation = Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void react() {
+            public void react(ReactorComputation reactorComputation) {
                 seekBar.setProgress(viewModel.getFavoritePercentage());
                 sliderValue.setText("Percent favorite: " + String.valueOf(viewModel.getFavoritePercentage()));
 
@@ -90,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
 
         Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void react() {
+            public void react(ReactorComputation reactorComputation) {
                 viewModel.setFavoriteFood(viewModel.isPizza() ? FavoriteFoodViewModel.PIZZA : FavoriteFoodViewModel.MANGOES);
             }
         });

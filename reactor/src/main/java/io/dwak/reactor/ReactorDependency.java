@@ -2,6 +2,8 @@ package io.dwak.reactor;
 
 import android.util.SparseArray;
 
+import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
+
 /**
  * A Dependency represents an atomic unit of reactive data that a
  * computation might depend on.
@@ -37,9 +39,9 @@ public class ReactorDependency {
         final int id = reactorComputation.getId();
         if (mDependentsById.get(id) == null) {
             mDependentsById.put(id, reactorComputation);
-            reactorComputation.addInvalidateComputationFunction(new ReactorComputationFunction() {
+            reactorComputation.addInvalidateComputationFunction(new ReactorInvalidateCallback() {
                 @Override
-                public void react() {
+                public void onInvalidate() {
                     mDependentsById.remove(id);
                 }
             });

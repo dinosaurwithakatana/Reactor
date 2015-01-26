@@ -16,12 +16,12 @@ import io.dwak.reactiveviews.R;
 import io.dwak.reactiveviews.viewmodel.FavoriteFoodViewModel;
 import io.dwak.reactor.Reactor;
 import io.dwak.reactor.ReactorComputation;
-import io.dwak.reactor.ReactorComputationFunction;
+import io.dwak.reactor.interfaces.ReactorComputationFunction;
 
 /**
  * Created by vishnu on 1/25/15.
  */
-public class MainView extends RelativeLayout{
+public class MainView extends RelativeLayout {
 
     private TextView mTextView;
     private Button mButton;
@@ -56,9 +56,7 @@ public class MainView extends RelativeLayout{
         mSeekBar = (SeekBar) findViewById(R.id.seekbar);
         mEditText = (EditText) findViewById(R.id.edit_text);
         mEditTextDisplay = (TextView) findViewById(R.id.edit_text_display);
-    }
 
-    private void bindReactions() {
         mEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -91,22 +89,33 @@ public class MainView extends RelativeLayout{
             }
         });
 
+        mButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewModel.setIsPizza(!mViewModel.isPizza());
+            }
+        });
+    }
+
+    private void bindReactions() {
+        Reactor.getInstance().setShouldLog(true);
+
         Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void react() {
+            public void react(ReactorComputation reactorComputation) {
                 mEditTextDisplay.setText(mViewModel.getEditTextValue());
             }
         });
         Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void react() {
+            public void react(ReactorComputation reactorComputation) {
                 mTextView.setText(mViewModel.getFavoriteFood());
             }
         });
 
-        final ReactorComputation favoriteFoodPercentageComputation = Reactor.getInstance().autoRun(new ReactorComputationFunction() {
+        Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void react() {
+            public void react(ReactorComputation reactorComputation) {
                 mSeekBar.setProgress(mViewModel.getFavoritePercentage());
                 mSliderValue.setText("Percent favorite: " + String.valueOf(mViewModel.getFavoritePercentage()));
 
@@ -118,15 +127,8 @@ public class MainView extends RelativeLayout{
 
         Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
-            public void react() {
+            public void react(ReactorComputation reactorComputation) {
                 mViewModel.setFavoriteFood(mViewModel.isPizza() ? FavoriteFoodViewModel.PIZZA : FavoriteFoodViewModel.MANGOES);
-            }
-        });
-
-        mButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.setIsPizza(!mViewModel.isPizza());
             }
         });
     }

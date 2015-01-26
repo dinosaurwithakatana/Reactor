@@ -6,10 +6,17 @@ import android.os.Looper;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
+import io.dwak.reactor.interfaces.ReactorComputationFunction;
+import io.dwak.reactor.interfaces.ReactorFlushCallback;
+import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
+
 /**
  * Created by vrajeevan on 12/16/14.
  */
 public class Reactor {
+
+    public static final String TAG = Reactor.class.getSimpleName();
+
     /**
      * True if there is a current computation, meaning that dependencies on reactive data sources
      * will be tracked and potentially cause the current computation to be rerun.
@@ -26,7 +33,7 @@ public class Reactor {
     /**
      * The current computation, or `null` if there isn't one.
      * The current computation is the {@link ReactorComputation} object created by the innermost active call to
-     * {@link #autoRun(ReactorComputationFunction)}, and it's the computation that gains dependencies when reactive data sources
+     * {@link #autoRun(io.dwak.reactor.interfaces.ReactorComputationFunction)}, and it's the computation that gains dependencies when reactive data sources
      * are accessed.
      */
     private ReactorComputation mCurrentReactorComputation = null;
@@ -49,7 +56,7 @@ public class Reactor {
     /**
      * `true` if we are computing a computation now, either first time
      * or recompute.  This matches {@link #mActive} unless we are inside
-     * {@link #nonReactive(ReactorComputationFunction)}, which nullfies currentComputation even though
+     * {@link #nonReactive(io.dwak.reactor.interfaces.ReactorComputationFunction)}, which nullfies currentComputation even though
      * an enclosing computation may still be running.
      */
     private boolean mInCompute = false;
@@ -63,21 +70,17 @@ public class Reactor {
      */
     private boolean mThrowFirstError = false;
 
-    private ArrayList<ReactorComputationFunction> mTrackerFlushCallbacks;
+    private ArrayList<ReactorFlushCallback> mTrackerFlushCallbacks;
     private boolean mShouldLog;
 
     Reactor() {
         mPendingReactorComputations = new ArrayDeque<ReactorComputation>();
-        mTrackerFlushCallbacks = new ArrayList<ReactorComputationFunction>();
+        mTrackerFlushCallbacks = new ArrayList<ReactorFlushCallback>();
         sInstance = this;
     }
 
-    public static Reactor init() {
-        return new Reactor();
-    }
-
     public static Reactor getInstance() {
-        if(sInstance == null){
+        if (sInstance == null) {
             sInstance = new Reactor();
         }
         return sInstance;
@@ -87,7 +90,7 @@ public class Reactor {
         return mInCompute;
     }
 
-    public void setInCompute(boolean inCompute) {
+    void setInCompute(boolean inCompute) {
         mInCompute = inCompute;
     }
 
@@ -136,10 +139,11 @@ public class Reactor {
                 mPendingReactorComputations.remove().reCompute();
 
                 if (!mTrackerFlushCallbacks.isEmpty()) {
-                    final ReactorComputationFunction function = mTrackerFlushCallbacks.remove(0);
+                    final ReactorFlushCallback function = mTrackerFlushCallbacks.remove(0);
                     try {
-                        function.react();
+                        function.onFlush();
                     } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -157,7 +161,7 @@ public class Reactor {
 
 
     /**
-     * Run a {@link ReactorComputationFunction} now and rerun it later whenever its dependencies change.
+     * Run a {@link io.dwak.reactor.interfaces.ReactorComputationFunction} now and rerun it later whenever its dependencies change.
      * Returns a {@link ReactorComputation} object that can be used to stop or observe the rerunning.
      *
      * @param function function to run when dependencies change
@@ -167,9 +171,9 @@ public class Reactor {
         final ReactorComputation trackerReactorComputation = new ReactorComputation(function, mCurrentReactorComputation);
 
         if (mActive) {
-            onInvalidate(new ReactorComputationFunction() {
+            onInvalidate(new ReactorInvalidateCallback() {
                 @Override
-                public void react() {
+                public void onInvalidate() {
                     trackerReactorComputation.stop();
                 }
             });
@@ -180,6 +184,7 @@ public class Reactor {
 
     /**
      * Run a function without tracking dependencies.
+     *
      * @param function function to run in nonreactive
      * @return the reference to the computation function
      */
@@ -196,9 +201,10 @@ public class Reactor {
     /**
      * Registers a new {@link ReactorComputationFunction} react on the current computation (which must exist),
      * to be called immediately when the current computation is invalidated or stopped.
+     *
      * @param function the function react to be run on invalidation
      */
-    public void onInvalidate(ReactorComputationFunction function) {
+    public void onInvalidate(ReactorInvalidateCallback function) {
         if (!mActive) {
             throw new RuntimeException("Reactor.addInvalidateComputationFunction requires a currentComputation");
         }
@@ -206,7 +212,7 @@ public class Reactor {
         mCurrentReactorComputation.addInvalidateComputationFunction(function);
     }
 
-    public void afterFlush(ReactorComputationFunction function) {
+    public void afterFlush(ReactorFlushCallback function) {
         mTrackerFlushCallbacks.add(function);
         requireFlush();
     }
@@ -219,7 +225,8 @@ public class Reactor {
         mShouldLog = shouldLog;
     }
 
-    public boolean shouldLog() {
+    boolean shouldLog() {
         return mShouldLog;
     }
+
 }

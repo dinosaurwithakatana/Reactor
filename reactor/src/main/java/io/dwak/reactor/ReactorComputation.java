@@ -4,20 +4,48 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import io.dwak.reactor.interfaces.ReactorComputationFunction;
+import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
+
 /**
  * A Computation object represents code that is repeatedly rerun
  * in response to
  * reactive data changes. Computations don't have return values; they just
  * perform actions, such as rerendering a template on the screen. Computations
- * are created using {@link Reactor#autoRun(ReactorComputationFunction)}.
+ * are created using {@link Reactor#autoRun(io.dwak.reactor.interfaces.ReactorComputationFunction)}.
  * Use {@link #stop()} to prevent further rerunning of a
  * computation.
  */
 public class ReactorComputation {
+    private static final String TAG = ReactorComputation.class.getSimpleName();
     private final int mId;
-    private final ArrayList<ReactorComputationFunction> mInvalidateCallbacks;
+    private final ArrayList<ReactorInvalidateCallback> mInvalidateCallbacks;
     private final ReactorComputation mParent;
     private final ReactorComputationFunction mFunction;
+
+    public boolean isStopped() {
+        return mStopped;
+    }
+
+    public boolean isInvalidated() {
+        return mInvalidated;
+    }
+
+    public boolean isErrored() {
+        return mErrored;
+    }
+
+    public boolean isRecomputing() {
+        return mRecomputing;
+    }
+
+    public boolean isConstructingComputation() {
+        return mConstructingComputation;
+    }
+
+    public ReactorComputation getParent() {
+        return mParent;
+    }
 
     /**
      * true if this computation has been stopped
@@ -42,7 +70,7 @@ public class ReactorComputation {
         mStopped = false;
         mInvalidated = false;
         mId = Reactor.nextId++;
-        mInvalidateCallbacks = new ArrayList<ReactorComputationFunction>();
+        mInvalidateCallbacks = new ArrayList<ReactorInvalidateCallback>();
         mFirstRun = true;
         mParent = parent;
         mFunction = function;
@@ -86,11 +114,11 @@ public class ReactorComputation {
 
             // callbacks can't add callbacks, because
             // self.invalidated === true.
-            for (final ReactorComputationFunction invalidateCallback : mInvalidateCallbacks) {
+            for (final ReactorInvalidateCallback invalidateCallback : mInvalidateCallbacks) {
                 Reactor.getInstance().nonReactive(new ReactorComputationFunction() {
                     @Override
-                    public void react() {
-                        invalidateCallback.react();
+                    public void react(ReactorComputation reactorComputation) {
+                        invalidateCallback.onInvalidate();
                     }
                 });
             }
@@ -101,11 +129,13 @@ public class ReactorComputation {
     /**
      * Registers a {@link ReactorComputationFunction} to run when this computation is next invalidated,
      * or runs it immediately if the computation is already invalidated.
-     * The react is run exactly once and not upon future invalidations unless {@link #addInvalidateComputationFunction(ReactorComputationFunction)}
+     * The react is run exactly once and not upon future invalidations unless {@link #addInvalidateComputationFunction(io.dwak.reactor.interfaces.ReactorInvalidateCallback)}
      * is called again after the computation becomes valid again.
      */
-    public void addInvalidateComputationFunction(ReactorComputationFunction callback) {
+    public ReactorComputation addInvalidateComputationFunction(ReactorInvalidateCallback callback) {
         mInvalidateCallbacks.add(callback);
+
+        return this;
     }
 
     private void compute() {
@@ -114,12 +144,12 @@ public class ReactorComputation {
         Reactor.getInstance().setCurrentReactorComputation(this);
         boolean previousInCompute = Reactor.getInstance().isInCompute();
         Reactor.getInstance().setInCompute(true);
-        mFunction.react();
+        mFunction.react(this);
         Reactor.getInstance().setCurrentReactorComputation(previousReactorComputation);
         Reactor.getInstance().setInCompute(false);
 
         if (Reactor.getInstance().shouldLog()) {
-            Log.d(ReactorComputation.class.getSimpleName(), this.toString());
+            Log.d(TAG, this.toString());
         }
     }
 
@@ -130,7 +160,7 @@ public class ReactorComputation {
                 try {
                     compute();
                 } catch (Exception e) {
-
+                    e.printStackTrace();
                 }
                 // If _compute() invalidated us, we run again immediately.
                 // A computation that invalidates itself indefinitely is an
@@ -155,7 +185,7 @@ public class ReactorComputation {
 
     @Override
     public String toString() {
-        return "TrackerComputation{" +
+        return "ReactorComputation{" +
                 "mId=" + mId +
                 ", mInvalidateCallbacks=" + mInvalidateCallbacks +
                 ", mParent=" + mParent +
