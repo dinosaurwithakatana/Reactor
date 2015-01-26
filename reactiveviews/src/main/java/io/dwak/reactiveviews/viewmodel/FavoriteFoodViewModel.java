@@ -20,12 +20,12 @@ public class FavoriteFoodViewModel {
         mEditTextValue = new ReactorVar<String>("");
     }
 
-    public Boolean getIsPizza() {
+    public Boolean getPizza() {
         return mIsPizza.getValue();
     }
 
     public void setIsPizza(Boolean isPizza) {
-        mIsPizza.setValue(isPizza);
+        this.mIsPizza.setValue(isPizza);
     }
 
     public String getFavoriteFood() {
@@ -33,7 +33,7 @@ public class FavoriteFoodViewModel {
     }
 
     public void setFavoriteFood(String favoriteFood) {
-        mFavoriteFood.setValue(favoriteFood);
+        this.mFavoriteFood.setValue(favoriteFood);
     }
 
     public Integer getFavoritePercentage() {
@@ -41,7 +41,7 @@ public class FavoriteFoodViewModel {
     }
 
     public void setFavoritePercentage(Integer favoritePercentage) {
-        mFavoritePercentage.setValue(favoritePercentage);
+        this.mFavoritePercentage.setValue(favoritePercentage);
     }
 
     public String getEditTextValue() {
@@ -49,6 +49,6 @@ public class FavoriteFoodViewModel {
     }
 
     public void setEditTextValue(String editTextValue) {
-        mEditTextValue.setValue(editTextValue);
+        this.mEditTextValue.setValue(editTextValue);
     }
 }
