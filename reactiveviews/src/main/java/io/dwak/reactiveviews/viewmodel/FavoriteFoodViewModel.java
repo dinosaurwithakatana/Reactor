@@ -1,6 +1,6 @@
 package io.dwak.reactiveviews.viewmodel;
 
-import io.dwak.reactor.ReactorDependency;
+import io.dwak.reactor.ReactorVar;
 
 /**
  * Created by vishnu on 12/23/14.
@@ -8,59 +8,47 @@ import io.dwak.reactor.ReactorDependency;
 public class FavoriteFoodViewModel {
     public static String PIZZA = "PIZZA";
     public static String MANGOES = "MANGOES";
-    private boolean mIsPizza;
-    private String mFavoriteFood;
-    private int mFavoritePercentage;
-    private String mEditTextValue;
-    private ReactorDependency mIsPizzaDep = new ReactorDependency();
-    private ReactorDependency mFavoriteFoodDep = new ReactorDependency();
-    private ReactorDependency mFavoritePercentageDep = new ReactorDependency();
-    private ReactorDependency mEditTextValueDep = new ReactorDependency();
+    private ReactorVar<Boolean> mIsPizza = new ReactorVar<Boolean>();
+    private ReactorVar<String> mFavoriteFood = new ReactorVar<String>();
+    private ReactorVar<Integer> mFavoritePercentage = new ReactorVar<Integer>();
+    private ReactorVar<String> mEditTextValue = new ReactorVar<String>();
 
     public FavoriteFoodViewModel(String favoriteFood, int favoritePercentage) {
-        mIsPizza = PIZZA.equals(favoriteFood);
-        mFavoriteFood = favoriteFood;
-        mFavoritePercentage = favoritePercentage;
-        mEditTextValue = "";
+        mIsPizza.setValue(PIZZA.equals(favoriteFood));
+        mFavoriteFood.setValue(favoriteFood);
+        mFavoritePercentage.setValue(favoritePercentage);
+        mEditTextValue.setValue("");
     }
 
-    public boolean isPizza() {
-        mIsPizzaDep.depend();
-        return mIsPizza;
+    public Boolean getIsPizza() {
+        return mIsPizza.getValue();
     }
 
-    public void setIsPizza(boolean isPizza) {
-        this.mIsPizza = isPizza;
-        mIsPizzaDep.changed();
+    public void setIsPizza(Boolean isPizza) {
+        mIsPizza.setValue(isPizza);
     }
 
     public String getFavoriteFood() {
-        mFavoriteFoodDep.depend();
-        return mFavoriteFood;
+        return mFavoriteFood.getValue();
     }
 
     public void setFavoriteFood(String favoriteFood) {
-        this.mFavoriteFood = favoriteFood;
-        mFavoriteFoodDep.changed();
+        mFavoriteFood.setValue(favoriteFood);
     }
 
-    public int getFavoritePercentage() {
-        mFavoritePercentageDep.depend();
-        return mFavoritePercentage;
+    public Integer getFavoritePercentage() {
+        return mFavoritePercentage.getValue();
     }
 
-    public void setFavoritePercentage(int favoritePercentage) {
-        this.mFavoritePercentage = favoritePercentage;
-        mFavoritePercentageDep.changed();
+    public void setFavoritePercentage(Integer favoritePercentage) {
+        mFavoritePercentage.setValue(favoritePercentage);
     }
 
     public String getEditTextValue() {
-        mEditTextValueDep.depend();
-        return mEditTextValue;
+        return mEditTextValue.getValue();
     }
 
     public void setEditTextValue(String editTextValue) {
-        this.mEditTextValue = editTextValue;
-        mEditTextValueDep.changed();
+        mEditTextValue.setValue(editTextValue);
     }
 }
