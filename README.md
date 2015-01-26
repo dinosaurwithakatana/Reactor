@@ -10,29 +10,29 @@ How to use:
 
 ###Example
 
-Field dependecies in an Activity:
+Field dependecies:
 
 ```java 
-    private String getFavoriteFood() {
-        mFavoriteFoodDep.depend();  // when this getter is called, the dependecy is added to the reactor
-        return mFavoriteFood;
+
+    //This wraps your variable in a reactive object
+    private ReactorVar<String> mFavoriteFood = new ReactorVar<String>();
+
+    public String getFavoriteFood() { 
+        return mFavoriteFood.getValue(); // this binds the dependency
     }
 
-    private void setFavoriteFood(String favoriteFood) {
-        mFavoriteFood = favoriteFood;
-        mFavoriteFoodDep.changed(); // when this setter is called, the dependecy is notified that the property has changed
+    public void setFavoriteFood(String favoriteFood) {
+        mFavoriteFood.setValue(favoriteFood); //this lets the ReactiveVar know the dep has changed
     }
 ```
+
 
 Changing and reacting to property change:
     
 ```java 
-    mFavoriteFoodDep = new ReactorDependency();
-    mFavoriteFood = "PIZZA";
-
     Reactor.getInstance().autoRun(new ReactorComputationFunction() {
         @Override
-        public void callback() {
+        public void react() {
             Log.d("TAG", getFavoriteFood());
         }
     });

@@ -92,7 +92,7 @@ public class MainView extends RelativeLayout {
         mButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                mViewModel.setIsPizza(!mViewModel.isPizza());
+                mViewModel.setIsPizza(!mViewModel.getIsPizza());
             }
         });
     }
@@ -128,7 +128,7 @@ public class MainView extends RelativeLayout {
         Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
             public void react(ReactorComputation reactorComputation) {
-                mViewModel.setFavoriteFood(mViewModel.isPizza() ? FavoriteFoodViewModel.PIZZA : FavoriteFoodViewModel.MANGOES);
+                mViewModel.setFavoriteFood(mViewModel.getIsPizza() ? FavoriteFoodViewModel.PIZZA : FavoriteFoodViewModel.MANGOES);
             }
         });
     }
