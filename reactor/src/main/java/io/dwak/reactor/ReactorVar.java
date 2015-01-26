@@ -10,6 +10,13 @@ public class ReactorVar<T> {
     private T mValue;
     private ReactorDependency mDependency = new ReactorDependency();
 
+    public ReactorVar() {
+    }
+
+    public ReactorVar(T value) {
+        mValue = value;
+    }
+
     public T getValue() {
         mDependency.depend();
         return mValue;

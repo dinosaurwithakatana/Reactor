@@ -8,16 +8,16 @@ import io.dwak.reactor.ReactorVar;
 public class FavoriteFoodViewModel {
     public static String PIZZA = "PIZZA";
     public static String MANGOES = "MANGOES";
-    private ReactorVar<Boolean> mIsPizza = new ReactorVar<Boolean>();
-    private ReactorVar<String> mFavoriteFood = new ReactorVar<String>();
-    private ReactorVar<Integer> mFavoritePercentage = new ReactorVar<Integer>();
-    private ReactorVar<String> mEditTextValue = new ReactorVar<String>();
+    private ReactorVar<Boolean> mIsPizza;
+    private ReactorVar<String> mFavoriteFood;
+    private ReactorVar<Integer> mFavoritePercentage;
+    private ReactorVar<String> mEditTextValue;
 
     public FavoriteFoodViewModel(String favoriteFood, int favoritePercentage) {
-        mIsPizza.setValue(PIZZA.equals(favoriteFood));
-        mFavoriteFood.setValue(favoriteFood);
-        mFavoritePercentage.setValue(favoritePercentage);
-        mEditTextValue.setValue("");
+        mIsPizza = new ReactorVar<>(PIZZA.equals(favoriteFood));
+        mFavoriteFood = new ReactorVar<>(favoriteFood);
+        mFavoritePercentage = new ReactorVar<>(favoritePercentage);
+        mEditTextValue = new ReactorVar<>("");
     }
 
     public Boolean getIsPizza() {
