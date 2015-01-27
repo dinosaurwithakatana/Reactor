@@ -18,16 +18,22 @@ public class ReactorVar<T> {
     }
 
     public T getValue() {
-        mDependency.depend();
+        if(mDependency !=null)
+            mDependency.depend();
         return mValue;
     }
 
     public void setValue(T value) {
         this.mValue = value;
-        mDependency.changed();
+        if(mDependency != null)
+            mDependency.changed();
     }
 
     public ReactorDependency getDependency() {
         return mDependency;
+    }
+
+    public void setDependency(ReactorDependency dependency) {
+        mDependency = dependency;
     }
 }

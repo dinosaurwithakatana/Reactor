@@ -106,6 +106,7 @@ public class MainView extends RelativeLayout {
                 mEditTextDisplay.setText(mViewModel.getEditTextValue());
             }
         });
+
         Reactor.getInstance().autoRun(new ReactorComputationFunction() {
             @Override
             public void react(ReactorComputation reactorComputation) {

@@ -21,6 +21,7 @@ public class ReactorComputation {
     private final int mId;
     private final ArrayList<ReactorInvalidateCallback> mInvalidateCallbacks;
     private final ReactorComputation mParent;
+
     private final ReactorComputationFunction mFunction;
 
     public boolean isStopped() {
