@@ -122,11 +122,11 @@ public class Reactor {
      */
     public void flush(boolean throwFirstError) {
         if (mInFlush) {
-            throw new RuntimeException("Can't call Reactor.flush while flushing");
+            throw new IllegalStateException("Can't call Reactor.flush while flushing");
         }
 
         if (mInCompute) {
-            throw new RuntimeException("Can't flush inside Reactor.autoRun");
+            throw new IllegalStateException("Can't flush inside Reactor.autoRun");
         }
 
         mInFlush = true;
@@ -136,7 +136,9 @@ public class Reactor {
         boolean finishedTry = false;
         try {
             while (!mPendingReactorComputations.isEmpty() || !mTrackerFlushCallbacks.isEmpty()) {
-                mPendingReactorComputations.remove().reCompute();
+                while(!mPendingReactorComputations.isEmpty()) {
+                    mPendingReactorComputations.remove().reCompute();
+                }
 
                 if (!mTrackerFlushCallbacks.isEmpty()) {
                     final ReactorFlushCallback function = mTrackerFlushCallbacks.remove(0);
