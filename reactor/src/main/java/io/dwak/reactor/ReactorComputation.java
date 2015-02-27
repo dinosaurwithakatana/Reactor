@@ -76,6 +76,7 @@ public class ReactorComputation {
         mParent = parent;
         mFunction = function;
         mRecomputing = false;
+        mErrored = true;
 
         try {
             compute();
