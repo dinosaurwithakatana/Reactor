@@ -146,9 +146,13 @@ public class ReactorComputation {
         Reactor.getInstance().setCurrentReactorComputation(this);
         boolean previousInCompute = Reactor.getInstance().isInCompute();
         Reactor.getInstance().setInCompute(true);
-        mFunction.react(this);
-        Reactor.getInstance().setCurrentReactorComputation(previousReactorComputation);
-        Reactor.getInstance().setInCompute(false);
+        try {
+            mFunction.react(this);
+        }
+        finally {
+            Reactor.getInstance().setCurrentReactorComputation(previousReactorComputation);
+            Reactor.getInstance().setInCompute(previousInCompute);
+        }
 
         if (Reactor.getInstance().shouldLog()) {
             Log.d(TAG, this.toString());
