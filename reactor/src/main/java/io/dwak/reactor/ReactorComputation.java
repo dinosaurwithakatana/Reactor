@@ -166,7 +166,7 @@ public class ReactorComputation {
                 try {
                     compute();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    throw e;
                 }
                 // If _compute() invalidated us, we run again immediately.
                 // A computation that invalidates itself indefinitely is an
