@@ -26,13 +26,11 @@ public class ReactorVar<T> {
     }
 
     public void setValue(T value) {
-        if(!value.equals(mValue)) {
-            this.mValue = value;
-            if (mDependency == null)
-                mDependency = new ReactorDependency();
+        this.mValue = value;
+        if (mDependency == null)
+            mDependency = new ReactorDependency();
 
-            mDependency.changed();
-        }
+        mDependency.changed();
     }
 
     public ReactorDependency getDependency() {
