@@ -56,7 +56,8 @@ public class ReactorDependency {
      */
     public void changed() {
         int key;
-        for (int i = 0; i < mDependentsById.size(); i++) {
+        final int size = mDependentsById.size();
+        for (int i = 0; i < size; i++) {
             key = mDependentsById.keyAt(i);
             mDependentsById.get(key).invalidate();
         }
@@ -69,5 +70,15 @@ public class ReactorDependency {
      */
     public boolean hasDependants() {
         return mDependentsById.size() > 0;
+    }
+
+    void unbind() {
+        int key = 0;
+        for(int i = 0; i < mDependentsById.size(); i++){
+            key = mDependentsById.keyAt(i);
+            mDependentsById.get(key).stop();
+        }
+
+        mDependentsById.clear();
     }
 }

@@ -199,6 +199,7 @@ public class Reactor {
         final ReactorComputation previous = getCurrentReactorComputation();
         setCurrentReactorComputation(null);
         try {
+            function.react(null);
             return function;
         } finally {
             setCurrentReactorComputation(previous);

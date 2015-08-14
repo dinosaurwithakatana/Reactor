@@ -202,6 +202,7 @@ public class ReactorComputation {
                 ", mFirstRun=" + mFirstRun +
                 ", mErrored=" + mErrored +
                 ", mConstructingComputation=" + mConstructingComputation +
+                ", Created at: " + Thread.currentThread().getStackTrace()[7].toString() +
                 "}";
     }
 }

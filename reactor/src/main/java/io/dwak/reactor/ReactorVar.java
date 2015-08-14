@@ -41,6 +41,13 @@ public class ReactorVar<T> {
         mDependency = dependency;
     }
 
+    public void unbindDependency(){
+        if(mDependency != null) {
+            mDependency.unbind();
+            mDependency = null;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -53,6 +60,13 @@ public class ReactorVar<T> {
         return true;
     }
 
+    public T getRawValue(){
+        return mValue;
+    }
+
+    public void setRawValue(T value){
+        mValue = value;
+    }
     @Override
     public int hashCode() {
         return mValue != null ? mValue.hashCode() : 0;
