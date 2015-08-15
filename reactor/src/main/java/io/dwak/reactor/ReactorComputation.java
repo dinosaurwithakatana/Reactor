@@ -8,9 +8,9 @@ import io.dwak.reactor.interfaces.ReactorComputationFunction;
 import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
 
 /**
- * A Computation object represents code that is repeatedly rerun
- * in response to
- * reactive data changes. Computations don't have return values; they just
+ * A ReactorComputation object represents code that is repeatedly rerun
+ * in response to reactive data changes.
+ * Computations don't have return values; they just
  * perform actions, such as rerendering a template on the screen. Computations
  * are created using {@link Reactor#autoRun(io.dwak.reactor.interfaces.ReactorComputationFunction)}.
  * Use {@link #stop()} to prevent further rerunning of a

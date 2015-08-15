@@ -11,7 +11,7 @@ import io.dwak.reactor.interfaces.ReactorFlushCallback;
 import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
 
 /**
- * Created by vrajeevan on 12/16/14.
+ * {@see https://www.meteor.com/tracker} for more documentation on the source library
  */
 public class Reactor {
 
@@ -70,12 +70,12 @@ public class Reactor {
      */
     private boolean mThrowFirstError = false;
 
-    private ArrayList<ReactorFlushCallback> mTrackerFlushCallbacks;
+    private ArrayList<ReactorFlushCallback> mFlushCallbacks;
     private boolean mShouldLog;
 
     Reactor() {
         mPendingReactorComputations = new ArrayDeque<ReactorComputation>();
-        mTrackerFlushCallbacks = new ArrayList<ReactorFlushCallback>();
+        mFlushCallbacks = new ArrayList<ReactorFlushCallback>();
         sInstance = this;
     }
 
@@ -135,13 +135,13 @@ public class Reactor {
 
         boolean finishedTry = false;
         try {
-            while (!mPendingReactorComputations.isEmpty() || !mTrackerFlushCallbacks.isEmpty()) {
+            while (!mPendingReactorComputations.isEmpty() || !mFlushCallbacks.isEmpty()) {
                 while(!mPendingReactorComputations.isEmpty()) {
                     mPendingReactorComputations.remove().reCompute();
                 }
 
-                if (!mTrackerFlushCallbacks.isEmpty()) {
-                    final ReactorFlushCallback function = mTrackerFlushCallbacks.remove(0);
+                if (!mFlushCallbacks.isEmpty()) {
+                    final ReactorFlushCallback function = mFlushCallbacks.remove(0);
                     try {
                         function.onFlush();
                     } catch (Exception e) {
@@ -216,7 +216,7 @@ public class Reactor {
     }
 
     public void afterFlush(ReactorFlushCallback function) {
-        mTrackerFlushCallbacks.add(function);
+        mFlushCallbacks.add(function);
         requireFlush();
     }
 
