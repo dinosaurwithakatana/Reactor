@@ -133,6 +133,10 @@ public class ReactorComputation {
      * or runs it immediately if the computation is already invalidated.
      * The react is run exactly once and not upon future invalidations unless {@link #addInvalidateComputationFunction(io.dwak.reactor.interfaces.ReactorInvalidateCallback)}
      * is called again after the computation becomes valid again.
+     *
+     * @param callback Callback to run on invalidation
+     *
+     * @return ReactorComputation with the added invalidation callback
      */
     public ReactorComputation addInvalidateComputationFunction(ReactorInvalidateCallback callback) {
         mInvalidateCallbacks.add(callback);

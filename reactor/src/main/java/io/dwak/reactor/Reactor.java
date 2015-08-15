@@ -11,7 +11,7 @@ import io.dwak.reactor.interfaces.ReactorFlushCallback;
 import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
 
 /**
- * {@see https://www.meteor.com/tracker} for more documentation on the source library
+ * See https://www.meteor.com/tracker for more documentation on the source library
  */
 public class Reactor {
 
@@ -44,12 +44,12 @@ public class Reactor {
     private ArrayDeque<ReactorComputation> mPendingReactorComputations;
 
     /**
-     * `true` if a {@link Reactor#flush(boolean)} is scheduled, or if we are in {@link #flush(boolean)} now
+     * `true` if a {@link #flush()} is scheduled, or if we are in {@link #flush()} now
      */
     private boolean mWillFlush = false;
 
     /**
-     * `true` if we are in {@link #flush(boolean)} now
+     * `true` if we are in {@link #flush()} now
      */
     private boolean mInFlush = false;
 
@@ -60,15 +60,6 @@ public class Reactor {
      * an enclosing computation may still be running.
      */
     private boolean mInCompute = false;
-
-    /**
-     * `true` if the `throwFirstError` option was passed in to the call
-     * to {@link #flush(boolean)} that we are in. When set, throw rather than log the
-     * first error encountered while flushing. Before throwing the error,
-     * finish flushing (from a finally block), logging any subsequent
-     * errors.
-     */
-    private boolean mThrowFirstError = false;
 
     private ArrayList<ReactorFlushCallback> mFlushCallbacks;
     private boolean mShouldLog;
@@ -99,7 +90,7 @@ public class Reactor {
             new Handler(Looper.getMainLooper()).postAtFrontOfQueue(new Runnable() {
                 @Override
                 public void run() {
-                    flush(false);
+                    flush();
                 }
             });
             mWillFlush = true;
@@ -117,10 +108,8 @@ public class Reactor {
 
     /**
      * Process all reactive updates immediately and ensure that all invalidated computations are rerun.
-     *
-     * @param throwFirstError
      */
-    public void flush(boolean throwFirstError) {
+    public void flush() {
         if (mInFlush) {
             throw new IllegalStateException("Can't call Reactor.flush while flushing");
         }
@@ -131,7 +120,6 @@ public class Reactor {
 
         mInFlush = true;
         mWillFlush = true;
-        mThrowFirstError = throwFirstError;
 
         boolean finishedTry = false;
         try {
@@ -153,7 +141,7 @@ public class Reactor {
         } finally {
             if (!finishedTry) {
                 mInFlush = false;
-                Reactor.getInstance().flush(false);
+                Reactor.getInstance().flush();
             }
 
             mWillFlush = false;
