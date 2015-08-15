@@ -2,7 +2,6 @@ package io.dwak.reactor;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -80,7 +79,6 @@ public class Reactor {
         sInstance = this;
     }
 
-    @NonNull
     public static Reactor getInstance() {
         if (sInstance == null) {
             sInstance = new Reactor();
@@ -108,7 +106,6 @@ public class Reactor {
         }
     }
 
-    @NonNull
     ReactorComputation getCurrentReactorComputation() {
         return mCurrentReactorComputation;
     }
@@ -172,8 +169,7 @@ public class Reactor {
      * @param function function to run when dependencies change
      * @return the tracker computation reference
      */
-    @NonNull
-    public ReactorComputation autoRun(@NonNull ReactorComputationFunction function) {
+    public ReactorComputation autoRun(ReactorComputationFunction function) {
         final ReactorComputation trackerReactorComputation = new ReactorComputation(function, mCurrentReactorComputation);
 
         if (mActive) {
@@ -194,8 +190,7 @@ public class Reactor {
      * @param function function to run in nonreactive
      * @return the reference to the computation function
      */
-    @NonNull
-    public ReactorComputationFunction nonReactive(@NonNull ReactorComputationFunction function) {
+    public ReactorComputationFunction nonReactive(ReactorComputationFunction function) {
         final ReactorComputation previous = getCurrentReactorComputation();
         setCurrentReactorComputation(null);
         try {
@@ -212,7 +207,7 @@ public class Reactor {
      *
      * @param function the function react to be run on invalidation
      */
-    public void onInvalidate(@NonNull ReactorInvalidateCallback function) {
+    public void onInvalidate(ReactorInvalidateCallback function) {
         if (!mActive) {
             throw new RuntimeException("Reactor.addInvalidateComputationFunction requires a currentComputation");
         }
@@ -220,12 +215,11 @@ public class Reactor {
         mCurrentReactorComputation.addInvalidateComputationFunction(function);
     }
 
-    public void afterFlush(@NonNull ReactorFlushCallback function) {
+    public void afterFlush(ReactorFlushCallback function) {
         mTrackerFlushCallbacks.add(function);
         requireFlush();
     }
 
-    @NonNull
     ArrayDeque<ReactorComputation> getPendingReactorComputations() {
         return mPendingReactorComputations;
     }
