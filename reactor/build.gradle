@@ -1,8 +1,9 @@
 apply plugin: 'com.android.library'
 
 ext {
-    bintrayRepo = 'maven'
+    bintrayRepo = 'android'
     bintrayName = 'reactor'
+    bintrayOrg = 'dwak'
 
     publishedGroupId = 'io.dwak'
     libraryName = 'Reactor'
@@ -45,5 +46,5 @@ dependencies {
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+apply from: 'bintray.gradle'
 
