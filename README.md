@@ -5,6 +5,8 @@ Port of meteor's transparent reactive framework for android
 
 Meteor's [tracker](https://github.com/meteor/meteor/blob/devel/packages/tracker/tracker.js)
 
+[Reactor docs](http://dwak.io/javadoc/io/dwak/reactor/index.html)
+
 [Tracker docs](https://github.com/meteor/meteor/wiki/Tracker-Manual)
 
 Installation
