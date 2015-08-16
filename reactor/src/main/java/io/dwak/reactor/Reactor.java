@@ -70,9 +70,9 @@ public class Reactor {
     private ArrayList<ReactorFlushCallback> mFlushCallbacks;
 
     /**
-     * Whether or not Reactor should log computations
+     * Log verbosity, {@link LogLevel#NONE} by default
      */
-    private boolean mShouldLog;
+    private LogLevel mLogLevel = LogLevel.NONE;
 
     Reactor() {
         mPendingReactorComputations = new ArrayDeque<ReactorComputation>();
@@ -220,13 +220,28 @@ public class Reactor {
         mInCompute = inCompute;
     }
 
+    /**
+     * Explicitly set the log level
+     * @param logLevel level to set
+     */
+    public void setLogLevel(LogLevel logLevel){
+        mLogLevel = logLevel;
+    }
 
+    /**
+     * Sets LogLevel to {@link LogLevel#ALL}
+     * @param shouldLog true if log level should be changed to ALL
+     */
     public void setShouldLog(boolean shouldLog) {
-        mShouldLog = shouldLog;
+        mLogLevel = shouldLog ? LogLevel.ALL : LogLevel.NONE;
     }
 
     boolean shouldLog() {
-        return mShouldLog;
+        return mLogLevel != LogLevel.NONE;
+    }
+
+    LogLevel getLogLevel(){
+        return mLogLevel;
     }
 
 }

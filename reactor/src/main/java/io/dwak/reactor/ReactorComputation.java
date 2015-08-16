@@ -67,6 +67,9 @@ public class ReactorComputation {
     private boolean mConstructingComputation = false;
 
     ReactorComputation(ReactorComputationFunction function, ReactorComputation parent) {
+        if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
+            Log.d(TAG, "Computation in construction");
+        }
         mStopped = false;
         mInvalidated = false;
         mId = Reactor.nextId++;
@@ -85,7 +88,6 @@ public class ReactorComputation {
             if (mErrored) {
                 stop();
             }
-
         }
     }
 
@@ -94,6 +96,9 @@ public class ReactorComputation {
      */
     public void stop() {
         if (!mStopped) {
+            if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
+                Log.d(TAG, "Computation " + mId + "stopped");
+            }
             mStopped = true;
             invalidate();
         }
@@ -104,6 +109,9 @@ public class ReactorComputation {
      */
     public void invalidate() {
         if (!mInvalidated) {
+            if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
+                Log.d(TAG, "Computation " + mId + "invalidating");
+            }
             // if we're currently in _recompute(), don't enqueue
             // ourselves, since we'll rerun immediately anyway.
             if (!mRecomputing && !mStopped) {
@@ -163,6 +171,9 @@ public class ReactorComputation {
     }
 
     void reCompute() {
+        if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
+            Log.d(TAG, "Computation " + mId + "recomputing");
+        }
         mRecomputing = true;
         try {
             while (mInvalidated && !mStopped) {
