@@ -34,6 +34,7 @@ android {
         targetSdkVersion 22
         versionCode 4
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -44,6 +45,9 @@ android {
 }
 
 dependencies {
+    androidTestCompile 'com.android.support.test:runner:0.3'
+    // Set this dependency to use JUnit 4 rules
+    androidTestCompile 'com.android.support.test:rules:0.3'
 }
 
 apply from: 'install.gradle'

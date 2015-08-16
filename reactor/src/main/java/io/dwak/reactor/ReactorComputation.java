@@ -97,7 +97,7 @@ public class ReactorComputation {
     public void stop() {
         if (!mStopped) {
             if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
-                Log.d(TAG, "Computation " + mId + "stopped");
+                Log.d(TAG, "Computation " + mId + " stopped");
             }
             mStopped = true;
             invalidate();
@@ -110,7 +110,7 @@ public class ReactorComputation {
     public void invalidate() {
         if (!mInvalidated) {
             if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
-                Log.d(TAG, "Computation " + mId + "invalidating");
+                Log.d(TAG, "Computation " + mId + " invalidating");
             }
             // if we're currently in _recompute(), don't enqueue
             // ourselves, since we'll rerun immediately anyway.
@@ -172,7 +172,7 @@ public class ReactorComputation {
 
     void reCompute() {
         if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
-            Log.d(TAG, "Computation " + mId + "recomputing");
+            Log.d(TAG, "Computation " + mId + " recomputing");
         }
         mRecomputing = true;
         try {

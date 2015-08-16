@@ -2,6 +2,7 @@ package io.dwak.reactor;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
  */
 public class Reactor {
 
-    public static final String TAG = Reactor.class.getSimpleName();
+    public static final String TAG = "Reactor";
 
     /**
      * True if there is a current computation, meaning that dependencies on reactive data sources
@@ -102,6 +103,9 @@ public class Reactor {
      * Process all reactive updates immediately and ensure that all invalidated computations are rerun.
      */
     public void flush() {
+        if(getLogLevel() == LogLevel.ALL){
+            Log.d(TAG, "Reactor is flushing");
+        }
         if (mInFlush) {
             throw new IllegalStateException("Can't call Reactor.flush while flushing");
         }
@@ -149,6 +153,9 @@ public class Reactor {
      * @return the {@link ReactorComputation} reference
      */
     public ReactorComputation autoRun(ReactorComputationFunction function) {
+        if(function == null){
+            throw new NullPointerException("function cannot be null!");
+        }
         final ReactorComputation trackerReactorComputation = new ReactorComputation(function, mCurrentReactorComputation);
 
         if (mActive) {
