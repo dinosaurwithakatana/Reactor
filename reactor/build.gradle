@@ -13,6 +13,7 @@ ext {
 
     siteUrl = 'https://github.com/dinosaurwithakatana/Reactor'
     gitUrl = 'https://github.com/dinosaurwithakatana/Reactor.git'
+    issueUrl = 'https://github.com/dinosaurwithakatana/Reactor/issues'
 
     libraryVersion = '1.0'
 
@@ -45,6 +46,6 @@ android {
 dependencies {
 }
 
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'install.gradle'
 apply from: 'bintray.gradle'
 

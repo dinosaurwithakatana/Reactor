@@ -19,34 +19,21 @@ import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
 public class ReactorComputation {
     private static final String TAG = ReactorComputation.class.getSimpleName();
     private final int mId;
+
+    /**
+     * Collection of callbacks to run on invalidation
+     */
     private final ArrayList<ReactorInvalidateCallback> mInvalidateCallbacks;
+
+    /**
+     * Possible parent computation for nested computations
+     */
     private final ReactorComputation mParent;
 
+    /**
+     * Function that this computation will run
+     */
     private final ReactorComputationFunction mFunction;
-
-    public boolean isStopped() {
-        return mStopped;
-    }
-
-    public boolean isInvalidated() {
-        return mInvalidated;
-    }
-
-    public boolean isErrored() {
-        return mErrored;
-    }
-
-    public boolean isRecomputing() {
-        return mRecomputing;
-    }
-
-    public boolean isConstructingComputation() {
-        return mConstructingComputation;
-    }
-
-    public ReactorComputation getParent() {
-        return mParent;
-    }
 
     /**
      * true if this computation has been stopped
@@ -57,6 +44,10 @@ public class ReactorComputation {
      * true if this computation has been invalidated or stopped
      */
     private boolean mInvalidated;
+
+    /**
+     * True if the computation is recomputing
+     */
     private boolean mRecomputing;
 
     /**
@@ -64,7 +55,15 @@ public class ReactorComputation {
      * is called, and false on subsequent reruns and at other times.
      */
     private boolean mFirstRun;
+
+    /**
+     * True if the computation has errored
+     */
     private boolean mErrored;
+
+    /**
+     * True if the computation is in the process of being constructed
+     */
     private boolean mConstructingComputation = false;
 
     ReactorComputation(ReactorComputationFunction function, ReactorComputation parent) {
@@ -184,6 +183,31 @@ public class ReactorComputation {
         }
 
     }
+
+    public boolean isStopped() {
+        return mStopped;
+    }
+
+    public boolean isInvalidated() {
+        return mInvalidated;
+    }
+
+    public boolean isErrored() {
+        return mErrored;
+    }
+
+    public boolean isRecomputing() {
+        return mRecomputing;
+    }
+
+    public boolean isConstructingComputation() {
+        return mConstructingComputation;
+    }
+
+    public ReactorComputation getParent() {
+        return mParent;
+    }
+
 
     public int getId() {
         return mId;

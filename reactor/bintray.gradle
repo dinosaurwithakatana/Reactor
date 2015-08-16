@@ -37,6 +37,7 @@ bintray {
         userOrg = bintrayOrg
         websiteUrl = siteUrl
         vcsUrl = gitUrl
+        issueTrackerUrl = issueUrl
         licenses = allLicenses
         publish = true
         publicDownloadNumbers = true

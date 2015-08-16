@@ -72,8 +72,12 @@ public class ReactorDependency {
         return mDependentsById.size() > 0;
     }
 
+
+    /**
+     * Removes all dependants from this dependency object
+     */
     void unbind() {
-        int key = 0;
+        int key;
         for(int i = 0; i < mDependentsById.size(); i++){
             key = mDependentsById.keyAt(i);
             mDependentsById.get(key).stop();

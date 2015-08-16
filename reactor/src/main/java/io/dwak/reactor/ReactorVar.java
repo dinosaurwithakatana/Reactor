@@ -17,6 +17,20 @@ public class ReactorVar<T> {
         mValue = value;
     }
 
+    /**
+     * Unbind and null out the object's {@link ReactorDependency}
+     */
+    public void unbindDependency(){
+        if(mDependency != null) {
+            mDependency.unbind();
+            mDependency = null;
+        }
+    }
+
+    /**
+     * Gets the value, and adds a dependency
+     * @return Value that this ReactorVar contains
+     */
     public T getValue() {
         if (mDependency == null)
             mDependency = new ReactorDependency();
@@ -25,6 +39,10 @@ public class ReactorVar<T> {
         return mValue;
     }
 
+    /**
+     * Sets the contained value and marks the dependency as changed
+     * @param value Value to set
+     */
     public void setValue(T value) {
         this.mValue = value;
         if (mDependency == null)
@@ -41,11 +59,25 @@ public class ReactorVar<T> {
         mDependency = dependency;
     }
 
-    public void unbindDependency(){
-        if(mDependency != null) {
-            mDependency.unbind();
-            mDependency = null;
-        }
+    /**
+     * Gets the contained value without creating a dependency
+     * @return The contained value
+     */
+    public T getRawValue(){
+        return mValue;
+    }
+
+    /**
+     * Sets the value without changing the {@link ReactorDependency}
+     * @param value Value to set
+     */
+    public void setRawValue(T value){
+        mValue = value;
+    }
+
+    @Override
+    public int hashCode() {
+        return mValue != null ? mValue.hashCode() : 0;
     }
 
     @Override
@@ -60,15 +92,4 @@ public class ReactorVar<T> {
         return true;
     }
 
-    public T getRawValue(){
-        return mValue;
-    }
-
-    public void setRawValue(T value){
-        mValue = value;
-    }
-    @Override
-    public int hashCode() {
-        return mValue != null ? mValue.hashCode() : 0;
-    }
 }

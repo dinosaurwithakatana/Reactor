@@ -23,6 +23,9 @@ public class Reactor {
      */
     static boolean mActive = false;
 
+    /**
+     * Tracks the next id for a computation
+     */
     static int nextId = 1;
 
     /**
@@ -61,13 +64,19 @@ public class Reactor {
      */
     private boolean mInCompute = false;
 
+    /**
+     * Collection of callbacks to call on flush
+     */
     private ArrayList<ReactorFlushCallback> mFlushCallbacks;
+
+    /**
+     * Whether or not Reactor should log computations
+     */
     private boolean mShouldLog;
 
     Reactor() {
         mPendingReactorComputations = new ArrayDeque<ReactorComputation>();
         mFlushCallbacks = new ArrayList<ReactorFlushCallback>();
-        sInstance = this;
     }
 
     public static Reactor getInstance() {
@@ -75,14 +84,6 @@ public class Reactor {
             sInstance = new Reactor();
         }
         return sInstance;
-    }
-
-    public boolean isInCompute() {
-        return mInCompute;
-    }
-
-    void setInCompute(boolean inCompute) {
-        mInCompute = inCompute;
     }
 
     public void requireFlush() {
@@ -95,15 +96,6 @@ public class Reactor {
             });
             mWillFlush = true;
         }
-    }
-
-    ReactorComputation getCurrentReactorComputation() {
-        return mCurrentReactorComputation;
-    }
-
-    void setCurrentReactorComputation(ReactorComputation currentReactorComputation) {
-        mCurrentReactorComputation = currentReactorComputation;
-        mActive = currentReactorComputation != null;
     }
 
     /**
@@ -149,13 +141,12 @@ public class Reactor {
         }
     }
 
-
     /**
      * Run a {@link io.dwak.reactor.interfaces.ReactorComputationFunction} now and rerun it later whenever its dependencies change.
      * Returns a {@link ReactorComputation} object that can be used to stop or observe the rerunning.
      *
      * @param function function to run when dependencies change
-     * @return the tracker computation reference
+     * @return the {@link ReactorComputation} reference
      */
     public ReactorComputation autoRun(ReactorComputationFunction function) {
         final ReactorComputation trackerReactorComputation = new ReactorComputation(function, mCurrentReactorComputation);
@@ -208,9 +199,27 @@ public class Reactor {
         requireFlush();
     }
 
+    ReactorComputation getCurrentReactorComputation() {
+        return mCurrentReactorComputation;
+    }
+
+    void setCurrentReactorComputation(ReactorComputation currentReactorComputation) {
+        mCurrentReactorComputation = currentReactorComputation;
+        mActive = currentReactorComputation != null;
+    }
+
     ArrayDeque<ReactorComputation> getPendingReactorComputations() {
         return mPendingReactorComputations;
     }
+
+    public boolean isInCompute() {
+        return mInCompute;
+    }
+
+    void setInCompute(boolean inCompute) {
+        mInCompute = inCompute;
+    }
+
 
     public void setShouldLog(boolean shouldLog) {
         mShouldLog = shouldLog;
