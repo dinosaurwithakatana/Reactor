@@ -7,6 +7,25 @@ Meteor's [tracker](https://github.com/meteor/meteor/blob/devel/packages/tracker/
 
 [Tracker docs](https://github.com/meteor/meteor/wiki/Tracker-Manual)
 
+Installation
+---
+
+Make sure you've got `jcenter` in your depdencies
+
+```groovy
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+```
+
+add the following to your `build.gradle` `depedencies` group
+
+```
+    compile 'io.dwak:reactor:1.0'
+```
+
 How to use:
 -----------
 
