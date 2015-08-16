@@ -67,7 +67,3 @@ Changing and reacting to property change:
 ```
 
 with the above code block, you would see `PIZZA` in your logs, and in 1 second, would see `MANGOES`
-
-###Intellij/Android Studio plugin
-
-Use this plugin to help generate some of the boilerplate: https://github.com/dinosaurwithakatana/android-reactor-intellij-plugin
