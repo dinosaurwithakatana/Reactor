@@ -9,7 +9,7 @@ import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
  * computation might depend on.
  * When the data changes, the computations are invalidated.
  */
-public class ReactorDependency {
+public final class ReactorDependency {
     private SparseArray<ReactorComputation> mDependentsById;
 
     public ReactorDependency() {

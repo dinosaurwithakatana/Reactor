@@ -9,6 +9,7 @@ package io.dwak.reactor;
 public class ReactorVar<T> {
     private T mValue;
     private ReactorDependency mDependency = new ReactorDependency();
+    private DependencyUnboundListener mDependencyUnboundListener;
 
     public ReactorVar() {
     }
@@ -24,6 +25,9 @@ public class ReactorVar<T> {
         if(mDependency != null) {
             mDependency.unbind();
             mDependency = null;
+            if(mDependencyUnboundListener != null){
+                mDependencyUnboundListener.onDependencyUnbound();
+            }
         }
     }
 
@@ -75,6 +79,10 @@ public class ReactorVar<T> {
         mValue = value;
     }
 
+    public void setDependencyUnboundListener(DependencyUnboundListener listener){
+        mDependencyUnboundListener = listener;
+    }
+
     @Override
     public int hashCode() {
         return mValue != null ? mValue.hashCode() : 0;
@@ -92,4 +100,7 @@ public class ReactorVar<T> {
         return true;
     }
 
+    public interface DependencyUnboundListener{
+        void onDependencyUnbound();
+    }
 }

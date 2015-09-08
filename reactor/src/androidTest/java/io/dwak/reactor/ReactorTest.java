@@ -207,4 +207,136 @@ public class ReactorTest {
         Reactor.getInstance().flush();
         expect(str);
     }
+
+//    @Test
+//    public void trackerFlush(){
+//        mBuf = "";
+//        ReactorComputation c1 = Reactor.getInstance().autoRun(new ReactorComputationFunction() {
+//            @Override
+//            public void react(ReactorComputation reactorComputation) {
+//                mBuf += 'a';
+//                // invalidate first time
+//                if (reactorComputation.isFirstRun())
+//                    reactorComputation.invalidate();
+//            }
+//        });
+//
+//        Assert.assertEquals(mBuf, "a");
+//        Reactor.getInstance().flush();
+//        Assert.assertEquals(mBuf, "aa");
+//        Reactor.getInstance().flush();
+//        Assert.assertEquals(mBuf, "aa");
+//        c1.stop();
+//        Reactor.getInstance().flush();
+//        Assert.assertEquals(mBuf, "aa");
+//
+//        //////
+//
+//        mBuf = "";
+//
+//        ReactorComputation c2 = Reactor.getInstance().autoRun(new ReactorComputationFunction() {
+//            @Override
+//            public void react(ReactorComputation reactorComputation) {
+//                mBuf += 'a';
+//                // invalidate first time
+//                if (reactorComputation.isFirstRun())
+//                    reactorComputation.invalidate();
+//
+//                Reactor.getInstance().onInvalidate(new ReactorInvalidateCallback() {
+//                    @Override
+//                    public void onInvalidate() {
+//                        mBuf += "*";
+//                    }
+//                });
+//            }
+//        });
+//
+//        Assert.assertEquals(mBuf, "a*");
+//        Reactor.getInstance().flush();
+//        Assert.assertEquals(mBuf, "a*a");
+//        c2.stop();
+//        Assert.assertEquals(mBuf, "a*a*");
+//        Reactor.getInstance().flush();
+//        Assert.assertEquals(mBuf, "a*a*");
+//
+//        /////
+//        // Can flush a diferent run from a run;
+//        // no current computation in afterFlush
+//
+//        mBuf = "";
+//
+//        ReactorComputation c3 = Reactor.getInstance().autoRun(new ReactorComputationFunction() {
+//            @Override
+//            public void react(ReactorComputation reactorComputation) {
+//                mBuf += 'a';
+//                // invalidate first time
+//                if (reactorComputation.isFirstRun())
+//                    reactorComputation.invalidate();
+//                Reactor.getInstance().afterFlush(new ReactorFlushCallback() {
+//                    @Override
+//                    public void onFlush() {
+//                        mBuf += (Reactor.mActive ? "1" : "0");
+//                    }
+//                });
+//            }
+//        });
+//
+//        Reactor.getInstance().afterFlush(new ReactorFlushCallback() {
+//            @Override
+//            public void onFlush() {
+//                mBuf += "c";
+//            }
+//        });
+//
+//        final ReactorComputation[] c4 = new ReactorComputation[1];
+//        Reactor.getInstance().autoRun(new ReactorComputationFunction() {
+//            @Override
+//            public void react(ReactorComputation reactorComputation) {
+//                c4[0] = reactorComputation;
+//                mBuf += "b";
+//            }
+//        });
+//
+//        Reactor.getInstance().flush();
+//        Assert.assertEquals(mBuf, "aba0c0");
+//        c3.stop();
+//        c4[0].stop();
+//        Reactor.getInstance().flush();
+//
+//        // cases where flush throws
+//
+//        final boolean[] ran = {false};
+//        Reactor.getInstance().afterFlush(new ReactorFlushCallback() {
+//            @Override
+//            public void onFlush() {
+//                ran[0] = true;
+//                mException.expect(IllegalStateException.class);
+//                Reactor.getInstance().flush(); // illegal nested flush
+//            }
+//        });
+//
+//        Reactor.getInstance().flush();
+//        Assert.assertTrue(ran[0]);
+//
+//        Reactor.getInstance().autoRun(new ReactorComputationFunction() {
+//            @Override
+//            public void react(ReactorComputation reactorComputation) {
+//                mException.expect(IllegalStateException.class);
+//                Reactor.getInstance().flush();
+//            }
+//        });
+//
+//        Reactor.getInstance().autoRun(new ReactorComputationFunction() {
+//            @Override
+//            public void react(ReactorComputation reactorComputation) {
+//                Reactor.getInstance().autoRun(new ReactorComputationFunction() {
+//                    @Override
+//                    public void react(ReactorComputation reactorComputation) {
+//                        mException.expect(IllegalStateException.class);
+//                        Reactor.getInstance().flush();
+//                    }
+//                });
+//            }
+//        });
+//    }
 }

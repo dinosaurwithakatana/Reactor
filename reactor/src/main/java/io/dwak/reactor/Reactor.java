@@ -2,7 +2,6 @@ package io.dwak.reactor;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
 /**
  * See https://www.meteor.com/tracker for more documentation on the source library
  */
-public class Reactor {
+public final class Reactor {
 
     public static final String TAG = "Reactor";
 
@@ -74,6 +73,7 @@ public class Reactor {
      * Log verbosity, {@link LogLevel#NONE} by default
      */
     private LogLevel mLogLevel = LogLevel.NONE;
+    private Log mLog;
 
     Reactor() {
         mPendingReactorComputations = new ArrayDeque<ReactorComputation>();
@@ -89,7 +89,7 @@ public class Reactor {
 
     public void requireFlush() {
         if (!mWillFlush) {
-            new Handler(Looper.getMainLooper()).postAtFrontOfQueue(new Runnable() {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
                     flush();
@@ -103,9 +103,7 @@ public class Reactor {
      * Process all reactive updates immediately and ensure that all invalidated computations are rerun.
      */
     public void flush() {
-        if(getLogLevel() == LogLevel.ALL){
-            Log.d(TAG, "Reactor is flushing");
-        }
+        Lumberjack.log(TAG, "Reactor is flushing", LogLevel.ALL);
         if (mInFlush) {
             throw new IllegalStateException("Can't call Reactor.flush while flushing");
         }
@@ -120,7 +118,7 @@ public class Reactor {
         boolean finishedTry = false;
         try {
             while (!mPendingReactorComputations.isEmpty() || !mFlushCallbacks.isEmpty()) {
-                while(!mPendingReactorComputations.isEmpty()) {
+                while (!mPendingReactorComputations.isEmpty()) {
                     mPendingReactorComputations.remove().reCompute();
                 }
 
@@ -153,7 +151,7 @@ public class Reactor {
      * @return the {@link ReactorComputation} reference
      */
     public ReactorComputation autoRun(ReactorComputationFunction function) {
-        if(function == null){
+        if (function == null) {
             throw new NullPointerException("function cannot be null!");
         }
         final ReactorComputation trackerReactorComputation = new ReactorComputation(function, mCurrentReactorComputation);
@@ -229,14 +227,16 @@ public class Reactor {
 
     /**
      * Explicitly set the log level
+     *
      * @param logLevel level to set
      */
-    public void setLogLevel(LogLevel logLevel){
+    public void setLogLevel(LogLevel logLevel) {
         mLogLevel = logLevel;
     }
 
     /**
      * Sets LogLevel to {@link LogLevel#ALL}
+     *
      * @param shouldLog true if log level should be changed to ALL
      */
     public void setShouldLog(boolean shouldLog) {
@@ -247,8 +247,31 @@ public class Reactor {
         return mLogLevel != LogLevel.NONE;
     }
 
-    LogLevel getLogLevel(){
+    LogLevel getLogLevel() {
         return mLogLevel;
+    }
+
+    /**
+     * Set an instance of an {@link Log} delegate
+     * @param log {@link io.dwak.reactor.Reactor.Log} to use
+     */
+    public final void setLog(Log log){
+        mLog = log;
+    }
+
+    Log getLog(){
+        return mLog;
+    }
+
+    /**
+     * Callback interface for Reactor's logger
+     */
+    public interface Log {
+        /**
+         * Delegate for Reactor to log to
+         * @param message message to be logged
+         */
+        void log(String message);
     }
 
 }

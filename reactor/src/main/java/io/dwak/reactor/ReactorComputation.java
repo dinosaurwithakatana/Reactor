@@ -16,7 +16,7 @@ import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
  * Use {@link #stop()} to prevent further rerunning of a
  * computation.
  */
-public class ReactorComputation {
+public final class ReactorComputation {
     private static final String TAG = ReactorComputation.class.getSimpleName();
     private final int mId;
 
@@ -67,9 +67,7 @@ public class ReactorComputation {
     private boolean mConstructingComputation = false;
 
     ReactorComputation(ReactorComputationFunction function, ReactorComputation parent) {
-        if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
-            Log.d(TAG, "Computation in construction");
-        }
+        Lumberjack.log(TAG, "Computation in construction", LogLevel.ALL);
         mStopped = false;
         mInvalidated = false;
         mId = Reactor.nextId++;
@@ -96,9 +94,7 @@ public class ReactorComputation {
      */
     public void stop() {
         if (!mStopped) {
-            if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
-                Log.d(TAG, "Computation " + mId + " stopped");
-            }
+            Lumberjack.log(TAG, "Computation " + mId + " stopped", LogLevel.ALL);
             mStopped = true;
             invalidate();
         }
@@ -109,9 +105,7 @@ public class ReactorComputation {
      */
     public void invalidate() {
         if (!mInvalidated) {
-            if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
-                Log.d(TAG, "Computation " + mId + " invalidating");
-            }
+            Lumberjack.log(TAG, "Computation " + mId + " invalidating", LogLevel.ALL);
             // if we're currently in _recompute(), don't enqueue
             // ourselves, since we'll rerun immediately anyway.
             if (!mRecomputing && !mStopped) {
@@ -166,14 +160,16 @@ public class ReactorComputation {
         }
 
         if (Reactor.getInstance().shouldLog()) {
-            Log.d(TAG, this.toString());
+            if(Reactor.getInstance().getLog()!= null)
+                Reactor.getInstance().getLog().log(this.toString());
+            else {
+                Log.d(TAG, this.toString());
+            }
         }
     }
 
     void reCompute() {
-        if(Reactor.getInstance().getLogLevel() == LogLevel.ALL){
-            Log.d(TAG, "Computation " + mId + " recomputing");
-        }
+        Lumberjack.log(TAG, String.format("Computation %d recomputing", mId), LogLevel.ALL);
         mRecomputing = true;
         try {
             while (mInvalidated && !mStopped) {

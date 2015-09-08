@@ -7,15 +7,21 @@ public enum LogLevel {
     /**
      * No logging
      */
-    NONE,
+    NONE(0),
 
     /**
      * Only log when a computation is in compute
      */
-    COMPUTE,
+    COMPUTE(1),
 
     /**
      * Log all computation actions
      */
-    ALL
+    ALL(2);
+
+    public final int logLevelValue;
+
+    LogLevel(int i) {
+        logLevelValue = i;
+    }
 }
