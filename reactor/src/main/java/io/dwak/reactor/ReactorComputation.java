@@ -3,7 +3,6 @@ package io.dwak.reactor;
 import java.util.ArrayList;
 
 import io.dwak.reactor.interfaces.ReactorComputationFunction;
-import io.dwak.reactor.interfaces.ReactorComputationStopCallback;
 import io.dwak.reactor.interfaces.ReactorInvalidateCallback;
 
 /**
@@ -64,7 +63,7 @@ public final class ReactorComputation {
      * True if the computation is in the process of being constructed
      */
     private boolean mConstructingComputation = false;
-    private ReactorComputationStopCallback mStopCallback;
+    private StopCallback mStopCallback;
 
     ReactorComputation(ReactorComputationFunction function, ReactorComputation parent) {
         Lumberjack.log(TAG, "Computation in construction", LogLevel.ALL);
@@ -223,9 +222,9 @@ public final class ReactorComputation {
 
     /**
      * Sets a callback to be called when the computation is stopped
-     * @param stopCallback {@link ReactorComputationStopCallback} to be called
+     * @param stopCallback {@link StopCallback} to be called
      */
-    public final void setOnStopCallback(ReactorComputationStopCallback stopCallback){
+    public final void setOnStopCallback(StopCallback stopCallback){
         mStopCallback = stopCallback;
     }
 
@@ -244,5 +243,12 @@ public final class ReactorComputation {
                 ", mConstructingComputation=" + mConstructingComputation +
                 ", Created at: " + Thread.currentThread().getStackTrace()[7].toString() +
                 "}";
+    }
+
+    /**
+     * Callback for when a computation stops
+     */
+    public interface StopCallback {
+        void onStop();
     }
 }
