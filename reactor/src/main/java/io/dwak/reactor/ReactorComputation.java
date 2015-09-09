@@ -1,7 +1,5 @@
 package io.dwak.reactor;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 
 import io.dwak.reactor.interfaces.ReactorComputationFunction;
@@ -159,13 +157,7 @@ public final class ReactorComputation {
             Reactor.getInstance().setInCompute(previousInCompute);
         }
 
-        if (Reactor.getInstance().shouldLog()) {
-            if(Reactor.getInstance().getLog()!= null)
-                Reactor.getInstance().getLog().log(this.toString());
-            else {
-                Log.d(TAG, this.toString());
-            }
-        }
+        Lumberjack.log(TAG, this.toString(), LogLevel.COMPUTE);
     }
 
     void reCompute() {
