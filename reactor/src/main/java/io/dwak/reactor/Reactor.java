@@ -217,6 +217,10 @@ public final class Reactor {
         return mPendingReactorComputations;
     }
 
+    /**
+     * Retruns whether Reactor is currently computing
+     * @return true if a computaiton is being run
+     */
     public boolean isInCompute() {
         return mInCompute;
     }
@@ -252,7 +256,7 @@ public final class Reactor {
     }
 
     /**
-     * Set an instance of an {@link Log} delegate
+     * Set an instance of a {@link Log} delegate
      * @param log {@link io.dwak.reactor.Reactor.Log} to use
      */
     public final void setLog(Log log){
